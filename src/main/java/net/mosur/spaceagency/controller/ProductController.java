@@ -6,9 +6,11 @@ import lombok.NoArgsConstructor;
 import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.domain.model.User;
 import net.mosur.spaceagency.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,6 +60,15 @@ public class ProductController {
         return ResponseEntity.ok(productService.findProductsWithCriteria(missionName, productType, acquisitionDateFrom, acquistionDateTo));
 
     }
+
+    @PostMapping(path = "/buy")
+    @RolesAllowed("CUSTOMER")
+    public ResponseEntity<?> buyProducts(@Valid @RequestBody BuyProductsParam buyProductsParam,
+                                         @AuthenticationPrincipal User user){
+        productService.buyProducts(buyProductsParam.getProductsIds(), user);
+        return ResponseEntity.noContent().build();
+
+    }
 }
 
 @Getter
@@ -68,5 +79,11 @@ class NewProductParam{
     private String imageryType = "";
     private String startDate = "";
     private String finishDate = "";
+}
+
+@Getter
+@NoArgsConstructor
+class BuyProductsParam{
+    private List<Long> productsIds;
 }
 

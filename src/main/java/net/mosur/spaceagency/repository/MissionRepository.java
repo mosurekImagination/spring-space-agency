@@ -9,5 +9,4 @@ public interface MissionRepository extends CrudRepository<Mission, Long> {
 
     Optional<Mission> findByMissionName(String name);
 
-
 }

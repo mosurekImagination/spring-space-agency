@@ -1,16 +1,12 @@
 package net.mosur.spaceagency.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @NoArgsConstructor
@@ -23,9 +19,17 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String missionName;
+    @ManyToOne
+    private Mission mission;
+
     private Instant acquisitionDate;
-    private FootPrint footPrint;
+
+    @OneToMany
+    private List <Coordinate> footPrint;
     private BigDecimal price;
     private String URL;
+
+    @ManyToMany
+    @Setter
+    private Set<User> usersWithAccess;
 }

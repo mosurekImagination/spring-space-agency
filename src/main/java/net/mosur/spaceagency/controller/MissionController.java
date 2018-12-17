@@ -1,10 +1,10 @@
 package net.mosur.spaceagency.controller;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.ImageryType;
@@ -48,7 +48,7 @@ public class MissionController {
         );
 
 
-        missionService.save(mission);
+       missionService.save(mission);
         return ResponseEntity.ok(new HashMap<String, Object>() {{
             put("mission", mission);
         }});
@@ -90,6 +90,7 @@ public class MissionController {
 }
 
 @Getter
+@Setter
 @JsonRootName("mission")
 @NoArgsConstructor
 class NewMissionParam{
