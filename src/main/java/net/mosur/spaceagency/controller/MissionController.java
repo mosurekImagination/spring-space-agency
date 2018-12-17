@@ -21,6 +21,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,9 +37,7 @@ public class MissionController {
     public ResponseEntity createMission(@Valid @RequestBody NewMissionParam newMissionParam,
                                         BindingResult bindingResult,
                                         @AuthenticationPrincipal User user){
-        if(bindingResult.hasErrors()){
-            throw new InvalidRequestException(bindingResult);
-        }
+        checkInput(newMissionParam, bindingResult);
 
         Mission mission = new Mission(
                 newMissionParam.getMissionName(),
@@ -49,9 +48,30 @@ public class MissionController {
 
 
        missionService.save(mission);
-        return ResponseEntity.ok(new HashMap<String, Object>() {{
-            put("mission", mission);
+        Mission savedMission = missionService.findById(mission.getId()).get();
+
+        return ResponseEntity.status(201).body(new HashMap<String, Object>() {{
+            put("mission", savedMission);
         }});
+    }
+
+    private void checkInput(NewMissionParam newMissionParam, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(bindingResult);
+        }
+        if (missionService.findByMissionName(newMissionParam.getMissionName()).isPresent()) {
+            bindingResult.rejectValue("missionName", "DUPLICATED", "duplicated mission name");
+        }
+        if (!imageryTypeExists(newMissionParam.getImageryType())) {
+            bindingResult.rejectValue("imageryType", "BAD_TYPE", "this imagery type doesn't exists");
+        }
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(bindingResult);
+        }
+    }
+
+    private boolean imageryTypeExists(String imageryType) {
+        return Arrays.stream(ImageryType.values()).anyMatch(type -> type.name().equals(imageryType));
     }
 
     @PutMapping(path = "/{name}")
@@ -59,14 +79,13 @@ public class MissionController {
     public ResponseEntity<?> updateMission(@PathVariable("name") String missionName,
                                            @Valid @RequestBody UpdateMissionParam updateMissionParam,
                                            @AuthenticationPrincipal User user) {
-        Instant.now().toString();
         return missionService.findByMissionName(missionName).map(mission -> {
                     mission.update(updateMissionParam.getMissionName(),
                             updateMissionParam.getImageryType(),
                             updateMissionParam.getStartDate(),
                             updateMissionParam.getFinishDate());
                     missionService.save(mission);
-                    return ResponseEntity.ok(missionResponse(missionService.findByMissionName(updateMissionParam.getMissionName()).get()));
+            return ResponseEntity.ok(missionResponse(missionService.findById(mission.getId()).get()));
                 }
         ).orElseThrow(ResourceNotFoundException::new);
     }

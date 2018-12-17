@@ -46,6 +46,9 @@ public class ProductService {
             product.getUsersWithAccess().add(user);
             return productRepository.save(product);
         }).orElseThrow(ResourceNotFoundException::new);
+    }
 
+    public List<Product> getUserProducts(User user) {
+        return productRepository.findByUsersWithAccessContains(user);
     }
 }

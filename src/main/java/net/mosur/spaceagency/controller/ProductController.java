@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
+import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.User;
+import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,6 +31,9 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private MissionService missionService;
+
     @PostMapping
     @RolesAllowed("MANAGER")
     public ResponseEntity addProduct(@Valid @RequestBody NewProductParam newProductParam,
@@ -35,9 +43,14 @@ public class ProductController {
         }
 
         Product product = new Product();
+        product.setURL(newProductParam.getUrl());
+        product.setPrice(new BigDecimal(newProductParam.getPrice()));
+        product.setAcquisitionDate(Instant.parse(newProductParam.getAcquisitionDate()));
+
+        product.setMission(missionService.findByMissionName(newProductParam.getMissionName()).get());
 
         productService.save(product);
-        return ResponseEntity.ok(new HashMap<String, Object>(){{
+        return ResponseEntity.status(201).body(new HashMap<String, Object>() {{
             put("product", product);
         }});
     }
@@ -66,8 +79,10 @@ public class ProductController {
     public ResponseEntity<?> buyProducts(@Valid @RequestBody BuyProductsParam buyProductsParam,
                                          @AuthenticationPrincipal User user){
         productService.buyProducts(buyProductsParam.getProductsIds(), user);
-        return ResponseEntity.noContent().build();
-
+        return ResponseEntity.ok(
+                new HashMap<String, Object>() {{
+                    put("userProducts", productService.getUserProducts(user));
+                }});
     }
 }
 
@@ -76,9 +91,11 @@ public class ProductController {
 @NoArgsConstructor
 class NewProductParam{
     private String missionName = "";
-    private String imageryType = "";
-    private String startDate = "";
-    private String finishDate = "";
+    private List<Coordinate> footprint = new ArrayList<>();
+    private String url = "";
+    private String price = "";
+    private String acquisitionDate = "";
+
 }
 
 @Getter
