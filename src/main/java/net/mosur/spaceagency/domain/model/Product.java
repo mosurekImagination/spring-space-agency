@@ -1,18 +1,17 @@
 package net.mosur.spaceagency.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 @Entity
 public class Product {
@@ -22,25 +21,25 @@ public class Product {
     private long id;
 
     @ManyToOne
-    @JsonIgnore
     private Mission mission;
-
-    private String missionName;
 
     private Instant acquisitionDate;
 
     @OneToMany
     private List<Coordinate> footprint;
     private BigDecimal price;
-    private String URL;
+    private String url;
 
     @ManyToMany
     @Setter
     private Set<User> usersWithAccess;
 
-    public void setMission(Mission m) { // TO-DO
-        this.mission = m;
-        missionName = m.getMissionName();
+    public Product(Mission mission, Instant acquisitionDate, List<Coordinate> footprint, BigDecimal price, String url) {
+        this.mission = mission;
+        this.acquisitionDate = acquisitionDate;
+        this.footprint = footprint;
+        this.price = price;
+        this.url = url;
+        this.usersWithAccess = new HashSet<>();
     }
-
 }

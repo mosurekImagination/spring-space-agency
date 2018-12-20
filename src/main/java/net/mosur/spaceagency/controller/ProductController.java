@@ -8,6 +8,7 @@ import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.User;
+import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,22 +30,24 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+
+    private final MissionService missionService;
 
     @Autowired
-    private MissionService missionService;
+    public ProductController(ProductService productService, MissionService missionService) {
+        this.productService = productService;
+        this.missionService = missionService;
+    }
 
     @PostMapping
     @RolesAllowed("MANAGER")
-    public ResponseEntity addProduct(@Valid @RequestBody NewProductParam newProductParam,
-                      BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            throw new InvalidRequestException(bindingResult);
-        }
+    public ResponseEntity createProduct(@Valid @RequestBody NewProductParam newProductParam,
+                                        BindingResult bindingResult) {
+        checkInput(newProductParam, bindingResult);
 
         Product product = new Product();
-        product.setURL(newProductParam.getUrl());
+        product.setUrl(newProductParam.getUrl());
         product.setPrice(new BigDecimal(newProductParam.getPrice()));
         product.setAcquisitionDate(Instant.parse(newProductParam.getAcquisitionDate()));
 
@@ -51,8 +55,23 @@ public class ProductController {
 
         productService.save(product);
         return ResponseEntity.status(201).body(new HashMap<String, Object>() {{
-            put("product", product);
+            put("product", new ProductResponse(product));
         }});
+    }
+
+    private void checkInput(NewProductParam newProductParam, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(bindingResult);
+        }
+        if (!missionService.findByMissionName(newProductParam.getMissionName()).isPresent()) {
+            bindingResult.rejectValue("missionName", "NOT EXISTS", "mission with that name doesnt exists");
+        }
+        if (new BigDecimal(newProductParam.getPrice()).compareTo(BigDecimal.ZERO) < 0) {
+            bindingResult.rejectValue("price", "LESS THAN ZERO", "price must be 0 or more");
+        }
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(bindingResult);
+        }
     }
 
     @DeleteMapping(path = "/{id}")
@@ -67,21 +86,22 @@ public class ProductController {
     @GetMapping(path = "/search")
     @RolesAllowed("CUSTOMER")
     public ResponseEntity<?> searchProducts(@RequestParam(value = "missionName", required = false) String missionName,
-                               @RequestParam(value = "productType", required = false) String productType,
-                               @RequestParam(value = "acquisitionDateFrom ", required = false) String acquisitionDateFrom,
-                               @RequestParam(value = "acquistionDateTo", required = false) String acquistionDateTo){
-        return ResponseEntity.ok(productService.findProductsWithCriteria(missionName, productType, acquisitionDateFrom, acquistionDateTo));
-
+                                            @RequestParam(value = "productType", required = false) String productType,
+                                            @RequestParam(value = "acquisitionDateFrom ", required = false) String acquisitionDateFrom,
+                                            @RequestParam(value = "acquistionDateTo", required = false) String acquisitionDateTo) {
+        List<Product> products = productService.findProductsWithCriteria(missionName, productType, acquisitionDateFrom, acquisitionDateTo);
+        return ResponseEntity.ok(products.stream().map(productService::getProductResponse));
     }
 
     @PostMapping(path = "/buy")
     @RolesAllowed("CUSTOMER")
     public ResponseEntity<?> buyProducts(@Valid @RequestBody BuyProductsParam buyProductsParam,
                                          @AuthenticationPrincipal User user){
-        productService.buyProducts(buyProductsParam.getProductsIds(), user);
+        List<Product> products = productService.getProductsByIds(buyProductsParam.getProductsIds());
+        productService.buyProducts(products, user);
         return ResponseEntity.ok(
                 new HashMap<String, Object>() {{
-                    put("userProducts", productService.getUserProducts(user));
+                    put("boughtProducts", products.stream().map(product -> productService.getProductResponse(product, user)));
                 }});
     }
 }
@@ -90,15 +110,19 @@ public class ProductController {
 @JsonRootName("product")
 @NoArgsConstructor
 class NewProductParam{
+    @NotBlank(message = "can't be empty")
     private String missionName = "";
     private List<Coordinate> footprint = new ArrayList<>();
+    @NotBlank(message = "can't be empty")
     private String url = "";
+    @NotBlank(message = "can't be empty")
     private String price = "";
     private String acquisitionDate = "";
 
 }
 
 @Getter
+@JsonRootName("products")
 @NoArgsConstructor
 class BuyProductsParam{
     private List<Long> productsIds;

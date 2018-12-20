@@ -10,5 +10,6 @@ public class SpaceAgencyApplication {
 		SpringApplication.run(SpaceAgencyApplication.class, args);
 	}
 
+
 }
 

@@ -1,17 +1,17 @@
 package net.mosur.spaceagency.domain.model;
 
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
 
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 @EqualsAndHashCode(of = {"id"})
 @Entity
+@NoArgsConstructor
 public class Mission {
 
     @Id

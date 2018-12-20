@@ -287,12 +287,4 @@ public class MissionControllerTest {
             put("endDate", endDate);
         }};
     }
-
-    @Test
-    public void updateMission() {
-    }
-
-    @Test
-    public void deleteMission() {
-    }
 }

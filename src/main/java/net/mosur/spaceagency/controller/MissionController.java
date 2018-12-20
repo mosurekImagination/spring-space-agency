@@ -29,8 +29,12 @@ import java.util.Map;
 @RequestMapping("/missions")
 public class MissionController {
 
+    private final MissionService missionService;
+
     @Autowired
-    private MissionService missionService;
+    public MissionController(MissionService missionService) {
+        this.missionService = missionService;
+    }
 
     @PostMapping
     @RolesAllowed("MANAGER")
@@ -45,7 +49,6 @@ public class MissionController {
                 newMissionParam.getStartDate(),
                 newMissionParam.getFinishDate()
         );
-
 
        missionService.save(mission);
         Mission savedMission = missionService.findById(mission.getId()).get();

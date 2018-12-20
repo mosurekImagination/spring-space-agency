@@ -4,6 +4,8 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.domain.model.User;
+import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
 import org.junit.Before;
@@ -37,6 +39,7 @@ public class ProductControllerTest {
 
     @MockBean
     private MissionService missionService;
+
 
     @Before
     public void setUp() throws Exception {
@@ -101,11 +104,26 @@ public class ProductControllerTest {
         product.setId(1L);
         Product product1 = new Product();
         product.setId(2L);
+
+        Mission mission = new Mission();
+        mission.setMissionName("test");
+
+        product.setMission(mission);
+        product1.setMission(mission);
+        product.setUrl("url");
+        product1.setUrl("url");
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setMissionName("test");
+        productResponse.setUrl("url");
+        User user = new User();
+        user.setId(1);
+
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("productsIds", productIds);
         }};
+        when(productService.getProductsByIds(any())).thenReturn(Arrays.asList(product, product1));
+        when(productService.getProductResponse(any(), any())).thenReturn(productResponse);
 
-        when(productService.getUserProducts(any())).thenReturn(Arrays.asList(product, product1));
         given()
                 .contentType("application/json")
                 .body(params)
@@ -113,9 +131,11 @@ public class ProductControllerTest {
                 .post("/products/buy")
                 .then()
                 .statusCode(200)
-                .body("userProducts.size()", equalTo(2));
+                .body("boughtProducts.size()", equalTo(2))
+                .body("boughtProducts[0].missionName", equalTo("test"))
+                .body("boughtProducts[0].url", equalTo("url"));
 
-        verify(productService).buyProducts(eq(productIds), any());
+        verify(productService).buyProducts(any(), any());
     }
 
     @Test

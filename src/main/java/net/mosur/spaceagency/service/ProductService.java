@@ -1,15 +1,17 @@
 package net.mosur.spaceagency.service;
 
-import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.User;
+import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static net.mosur.spaceagency.domain.specification.ProductSpecification.*;
 
 @Service
 public class ProductService {
@@ -31,24 +33,35 @@ public class ProductService {
     }
 
     public List<Product> findProductsWithCriteria(String missionName, String productType, String acquisitionDateFrom, String acquistionDateTo) {
-        List<Product> results = new ArrayList<>();
-
-        return results;
+        Specification<Product> specification = Specification.where(
+                hasMissionName(missionName)
+                        .and(hasProductType(productType)
+                                .and(hasAcquisitionDateAfter(acquisitionDateFrom)
+                                        .and(hasAcquisitionDateBefore(acquistionDateTo)))));
+        return productRepository.findAll(specification);
     }
 
-    public void buyProducts(List<Long> productsIds, User user){
-            productsIds.forEach(product -> allowAccessToUser(product, user));
-    }
-
-    private void allowAccessToUser(long productId, User user){
-        productRepository.findById(productId).map(product ->
-        {
+    public List<Product> buyProducts(List<Product> products, User user) {
+        products.forEach(product -> {
             product.getUsersWithAccess().add(user);
-            return productRepository.save(product);
-        }).orElseThrow(ResourceNotFoundException::new);
+            productRepository.save(product);
+        });
+        return products;
     }
 
     public List<Product> getUserProducts(User user) {
         return productRepository.findByUsersWithAccessContains(user);
+    }
+
+    public List<Product> getProductsByIds(List<Long> productsIds) {
+        return productRepository.findAllById(productsIds);
+    }
+
+    public ProductResponse getProductResponse(Product product, User user) {
+        return new ProductResponse(product, user);
+    }
+
+    public ProductResponse getProductResponse(Product product) {
+        return new ProductResponse(product);
     }
 }

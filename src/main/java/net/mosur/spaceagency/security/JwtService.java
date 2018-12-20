@@ -1,7 +1,6 @@
 package net.mosur.spaceagency.security;
 
 import net.mosur.spaceagency.domain.model.User;
-import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
