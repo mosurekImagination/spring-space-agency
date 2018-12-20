@@ -97,7 +97,7 @@ public class OrderControllerTest {
             put("productsIds", productIds);
         }};
         when(productService.getProductsByIds(any())).thenReturn(Arrays.asList(product, product1));
-        when(productService.getProductResponse(any(), any())).thenReturn(productResponse);
+        when(productService.getProductResponseWithUrl(any(), any())).thenReturn(productResponse);
         when(userService.getUserId(any())).thenReturn(1L);
 
         given()

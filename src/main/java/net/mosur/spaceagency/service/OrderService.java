@@ -17,11 +17,13 @@ public class OrderService {
 
 
     public ProductsOrder makeOrder(List<Product> products, long userId) {
-        return new ProductsOrder(userId, products);
+        ProductsOrder order = new ProductsOrder(userId, products);
+        productsOrderRepository.save(order);
+        return order;
     }
 
     public List<ProductsOrder> getOrdersHistory(Long userId) {
-        return productsOrderRepository.findAllByUserIdOrderByCreateTime(userId);
+        return productsOrderRepository.findAllByUserIdOrderByCreatedAt(userId);
     }
 
     public List<Mission> getMostPopularMissions() {

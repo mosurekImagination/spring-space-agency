@@ -20,12 +20,16 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
+    private final UserService userService;
+    private final ProductService productService;
+    private final OrderService orderService;
+
     @Autowired
-    UserService userService;
-    @Autowired
-    ProductService productService;
-    @Autowired
-    OrderService orderService;
+    public OrderController(UserService userService, ProductService productService, OrderService orderService) {
+        this.userService = userService;
+        this.productService = productService;
+        this.orderService = orderService;
+    }
 
 
     @GetMapping("/history")
@@ -48,7 +52,7 @@ public class OrderController {
         orderService.makeOrder(products, userId);
         return ResponseEntity.ok(
                 new HashMap<String, Object>() {{
-                    put("boughtProducts", products.stream().map(product -> productService.getProductResponse(product, userId)));
+                    put("boughtProducts", products.stream().map(product -> productService.getProductResponseWithUrl(product, userId)));
                 }});
     }
 

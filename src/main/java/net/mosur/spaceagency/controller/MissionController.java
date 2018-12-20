@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.security.Principal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,8 +37,7 @@ public class MissionController {
     @PostMapping
     @RolesAllowed("MANAGER")
     public ResponseEntity createMission(@Valid @RequestBody NewMissionParam newMissionParam,
-                                        BindingResult bindingResult,
-                                        Principal user) {
+                                        BindingResult bindingResult) {
         checkInput(newMissionParam, bindingResult);
 
         Mission mission = new Mission(
@@ -64,7 +62,7 @@ public class MissionController {
         if (missionService.findByMissionName(newMissionParam.getMissionName()).isPresent()) {
             bindingResult.rejectValue("missionName", "DUPLICATED", "duplicated mission name");
         }
-        if (!imageryTypeExists(newMissionParam.getImageryType())) {
+        if (imageryTypeNotExists(newMissionParam.getImageryType())) {
             bindingResult.rejectValue("imageryType", "BAD_TYPE", "this imagery type doesn't exists");
         }
         if (bindingResult.hasErrors()) {
@@ -72,15 +70,14 @@ public class MissionController {
         }
     }
 
-    private boolean imageryTypeExists(String imageryType) {
-        return Arrays.stream(ImageryType.values()).anyMatch(type -> type.name().equals(imageryType));
+    private boolean imageryTypeNotExists(String imageryType) {
+        return !Arrays.stream(ImageryType.values()).anyMatch(type -> type.name().equals(imageryType));
     }
 
     @PutMapping(path = "/{name}")
     @RolesAllowed("MANAGER")
     public ResponseEntity<?> updateMission(@PathVariable("name") String missionName,
-                                           @Valid @RequestBody UpdateMissionParam updateMissionParam,
-                                           Principal principal) {
+                                           @Valid @RequestBody UpdateMissionParam updateMissionParam) {
         return missionService.findByMissionName(missionName).map(mission -> {
                     mission.update(updateMissionParam.getMissionName(),
                             updateMissionParam.getImageryType(),

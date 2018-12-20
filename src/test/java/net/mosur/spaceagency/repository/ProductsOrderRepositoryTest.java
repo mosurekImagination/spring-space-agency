@@ -15,8 +15,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @DataJpaTest
 @RunWith(SpringRunner.class)
@@ -100,5 +102,15 @@ public class ProductsOrderRepositoryTest {
         productsList = productsOrderRepository.getMostOrderedProducts();
         assertEquals(productsList.size(), 2);
         assertEquals(productsList.get(0), productMission2);
+    }
+
+    @Test
+    public void should_generate_create_date() {
+        ProductsOrder product2order = new ProductsOrder(2, Collections.singletonList(productMission2));
+
+        productsOrderRepository.save(product2order);
+        Optional<ProductsOrder> order = productsOrderRepository.findById(product2order.getId());
+        ProductsOrder o = order.get();
+        assertNotNull(o.getCreatedAt());
     }
 }

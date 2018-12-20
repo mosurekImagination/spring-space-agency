@@ -12,10 +12,8 @@ public class UserService {
         switch (principal.getName()) {
             case ("customer"):
                 return 1;
-            case ("customer2"):
-                return 2;
             case ("manager"):
-                return 3;
+                return 2;
             default:
                 throw new ResourceNotFoundException();
         }

@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ProductsOrderRepository extends JpaRepository<ProductsOrder, Long> {
 
-    List<ProductsOrder> findAllByUserIdOrderByCreateTime(long userId);
+    List<ProductsOrder> findAllByUserIdOrderByCreatedAt(long userId);
 
     @Query("Select products.mission from ProductsOrder o inner join o.products as products group by products.mission order by count(products.mission.id)")
     List<Mission> getMostOrderedMissions();

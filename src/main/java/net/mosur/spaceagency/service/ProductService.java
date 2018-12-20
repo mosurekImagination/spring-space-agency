@@ -18,7 +18,6 @@ public class ProductService {
     @Autowired
     ProductRepository productRepository;
 
-
     public void save(Product product) {
         productRepository.save(product);
     }
@@ -40,16 +39,11 @@ public class ProductService {
         return productRepository.findAll(specification);
     }
 
-    public List<Product> getUserProducts(long userId) {
-        return null;
-        // return productRepository.findByUsersWithAccessContains(user);
-    }
-
     public List<Product> getProductsByIds(List<Long> productsIds) {
         return productRepository.findAllById(productsIds);
     }
 
-    public ProductResponse getProductResponse(Product product, Long userId) {
+    public ProductResponse getProductResponseWithUrl(Product product, Long userId) {
         return new ProductResponse(product, userId);
     }
 

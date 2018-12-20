@@ -54,7 +54,6 @@ public class ProductRepositoryTest {
         productRepository.save(product);
         Optional<Product> optional = productRepository.findById(product.getId());
         assertThat(optional.isPresent(), is(true));
-
     }
 
     @Test
