@@ -1,7 +1,6 @@
 package net.mosur.spaceagency.service;
 
 import net.mosur.spaceagency.domain.model.Product;
-import net.mosur.spaceagency.domain.model.User;
 import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,24 +40,17 @@ public class ProductService {
         return productRepository.findAll(specification);
     }
 
-    public List<Product> buyProducts(List<Product> products, User user) {
-        products.forEach(product -> {
-            product.getUsersWithAccess().add(user);
-            productRepository.save(product);
-        });
-        return products;
-    }
-
-    public List<Product> getUserProducts(User user) {
-        return productRepository.findByUsersWithAccessContains(user);
+    public List<Product> getUserProducts(long userId) {
+        return null;
+        // return productRepository.findByUsersWithAccessContains(user);
     }
 
     public List<Product> getProductsByIds(List<Long> productsIds) {
         return productRepository.findAllById(productsIds);
     }
 
-    public ProductResponse getProductResponse(Product product, User user) {
-        return new ProductResponse(product, user);
+    public ProductResponse getProductResponse(Product product, Long userId) {
+        return new ProductResponse(product, userId);
     }
 
     public ProductResponse getProductResponse(Product product) {

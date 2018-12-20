@@ -4,8 +4,6 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
-import net.mosur.spaceagency.domain.model.User;
-import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
 import org.junit.Before;
@@ -18,7 +16,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -86,6 +87,7 @@ public class ProductControllerTest {
         product.setId(1L);
 
         when(productService.findById(eq(1L))).thenReturn(Optional.of(product));
+
         given()
                 .contentType("application/json")
                 .when()
@@ -94,48 +96,6 @@ public class ProductControllerTest {
                 .statusCode(204);
 
         verify(productService).deleteById(eq(productId));
-    }
-
-    @Test
-    @WithMockUser
-    public void should_buy_product_success() throws Exception {
-        List<Long> productIds = Arrays.asList(1L, 2L);
-        Product product = new Product();
-        product.setId(1L);
-        Product product1 = new Product();
-        product.setId(2L);
-
-        Mission mission = new Mission();
-        mission.setMissionName("test");
-
-        product.setMission(mission);
-        product1.setMission(mission);
-        product.setUrl("url");
-        product1.setUrl("url");
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setMissionName("test");
-        productResponse.setUrl("url");
-        User user = new User();
-        user.setId(1);
-
-        HashMap<String, Object> params = new HashMap<String, Object>() {{
-            put("productsIds", productIds);
-        }};
-        when(productService.getProductsByIds(any())).thenReturn(Arrays.asList(product, product1));
-        when(productService.getProductResponse(any(), any())).thenReturn(productResponse);
-
-        given()
-                .contentType("application/json")
-                .body(params)
-                .when()
-                .post("/products/buy")
-                .then()
-                .statusCode(200)
-                .body("boughtProducts.size()", equalTo(2))
-                .body("boughtProducts[0].missionName", equalTo("test"))
-                .body("boughtProducts[0].url", equalTo("url"));
-
-        verify(productService).buyProducts(any(), any());
     }
 
     @Test

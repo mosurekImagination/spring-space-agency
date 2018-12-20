@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Product;
-import net.mosur.spaceagency.domain.model.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,11 +33,11 @@ public class ProductResponse {
         this.price = product.getPrice();
     }
 
-    public ProductResponse(Product product, User user) {
+    public ProductResponse(Product product, Long userId) {
         this(product);
-        if (product.getUsersWithAccess() != null && product.getUsersWithAccess().contains(user)) {
-            this.url = product.getUrl();
-        }
+//        if (product.getUsersWithAccess() != null && product.getUsersWithAccess().contains(userId)) {
+//            this.url = product.getUrl();
+//        } /TO-DO
     }
 
 }

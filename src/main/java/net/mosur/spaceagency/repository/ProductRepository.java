@@ -1,14 +1,15 @@
 package net.mosur.spaceagency.repository;
 
 import net.mosur.spaceagency.domain.model.Product;
-import net.mosur.spaceagency.domain.model.User;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface ProductRepository extends JpaRepository<Product, Long>,
         JpaSpecificationExecutor<Product> {
 
@@ -21,7 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
     @Override
     void deleteById(Long aLong);
 
-    List<Product> findByUsersWithAccessContains(User user);
+    // List<Product> findByUsersWithAccessContains(User user); TO-DO
 
 
     List<Product> findAll(Specification<Product> spec);

@@ -9,17 +9,16 @@ import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
-import net.mosur.spaceagency.domain.model.User;
 import net.mosur.spaceagency.service.MissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,7 +39,7 @@ public class MissionController {
     @RolesAllowed("MANAGER")
     public ResponseEntity createMission(@Valid @RequestBody NewMissionParam newMissionParam,
                                         BindingResult bindingResult,
-                                        @AuthenticationPrincipal User user){
+                                        Principal user) {
         checkInput(newMissionParam, bindingResult);
 
         Mission mission = new Mission(
@@ -81,7 +80,7 @@ public class MissionController {
     @RolesAllowed("MANAGER")
     public ResponseEntity<?> updateMission(@PathVariable("name") String missionName,
                                            @Valid @RequestBody UpdateMissionParam updateMissionParam,
-                                           @AuthenticationPrincipal User user) {
+                                           Principal principal) {
         return missionService.findByMissionName(missionName).map(mission -> {
                     mission.update(updateMissionParam.getMissionName(),
                             updateMissionParam.getImageryType(),
@@ -95,8 +94,7 @@ public class MissionController {
 
     @DeleteMapping(path = "/{name}")
     @RolesAllowed("MANAGER")
-    public ResponseEntity<?> deleteMission(@PathVariable("name") String missionName,
-                                           @AuthenticationPrincipal User user){
+    public ResponseEntity<?> deleteMission(@PathVariable("name") String missionName) {
 
         return missionService.findByMissionName(missionName).map(mission ->{
             missionService.delete(mission);

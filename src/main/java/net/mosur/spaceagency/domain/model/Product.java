@@ -1,13 +1,14 @@
 package net.mosur.spaceagency.domain.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -27,12 +28,9 @@ public class Product {
 
     @OneToMany
     private List<Coordinate> footprint;
+
     private BigDecimal price;
     private String url;
-
-    @ManyToMany
-    @Setter
-    private Set<User> usersWithAccess;
 
     public Product(Mission mission, Instant acquisitionDate, List<Coordinate> footprint, BigDecimal price, String url) {
         this.mission = mission;
@@ -40,6 +38,5 @@ public class Product {
         this.footprint = footprint;
         this.price = price;
         this.url = url;
-        this.usersWithAccess = new HashSet<>();
     }
 }

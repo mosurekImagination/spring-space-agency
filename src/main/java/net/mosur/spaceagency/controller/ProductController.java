@@ -7,13 +7,11 @@ import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Product;
-import net.mosur.spaceagency.domain.model.User;
 import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +29,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-
     private final MissionService missionService;
 
     @Autowired
@@ -93,17 +90,6 @@ public class ProductController {
         return ResponseEntity.ok(products.stream().map(productService::getProductResponse));
     }
 
-    @PostMapping(path = "/buy")
-    @RolesAllowed("CUSTOMER")
-    public ResponseEntity<?> buyProducts(@Valid @RequestBody BuyProductsParam buyProductsParam,
-                                         @AuthenticationPrincipal User user){
-        List<Product> products = productService.getProductsByIds(buyProductsParam.getProductsIds());
-        productService.buyProducts(products, user);
-        return ResponseEntity.ok(
-                new HashMap<String, Object>() {{
-                    put("boughtProducts", products.stream().map(product -> productService.getProductResponse(product, user)));
-                }});
-    }
 }
 
 @Getter
