@@ -1,6 +1,5 @@
 package net.mosur.spaceagency.domain.payload;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.mosur.spaceagency.domain.model.Coordinate;
@@ -20,9 +19,6 @@ public class ProductResponse {
     private List<Coordinate> footPrint;
     private BigDecimal price;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String url;
-
     public ProductResponse(Product product) {
         this.id = product.getId();
         if (product.getMission() != null) {
@@ -31,13 +27,6 @@ public class ProductResponse {
         this.acquisitionDate = product.getAcquisitionDate();
         this.footPrint = product.getFootprint();
         this.price = product.getPrice();
-    }
-
-    public ProductResponse(Product product, Long userId) {
-        this(product);
-//        if (product.getUsersWithAccess() != null && product.getUsersWithAccess().contains(userId)) {
-//            this.url = product.getUrl();
-//        } /TO-DO
     }
 
 }

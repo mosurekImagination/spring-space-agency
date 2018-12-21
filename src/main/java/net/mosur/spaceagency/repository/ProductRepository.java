@@ -22,11 +22,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
     @Override
     void deleteById(Long aLong);
 
-    // List<Product> findByUsersWithAccessContains(User user); TO-DO
-
-
     List<Product> findAll(Specification<Product> spec);
-
-//    List<Product> findAllOrOrderByUsersWithAccess
-
 }

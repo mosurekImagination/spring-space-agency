@@ -10,8 +10,12 @@ import java.util.Optional;
 @Service
 public class MissionService {
 
+    private final MissionRepository missionRepository;
+
     @Autowired
-    MissionRepository missionRepository;
+    public MissionService(MissionRepository missionRepository) {
+        this.missionRepository = missionRepository;
+    }
 
     public Optional<Mission> findByMissionName(String name){
         return missionRepository.findByMissionName(name);

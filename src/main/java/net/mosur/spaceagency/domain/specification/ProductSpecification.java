@@ -59,4 +59,6 @@ public class ProductSpecification {
             return criteriaBuilder.between(root.get("acquisitionDate"), Instant.parse(takenAfter), Instant.parse(takenBefore));
         };
     }
+
+
 }

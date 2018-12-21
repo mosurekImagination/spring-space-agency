@@ -4,7 +4,7 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.ProductsOrder;
-import net.mosur.spaceagency.domain.payload.ProductResponse;
+import net.mosur.spaceagency.domain.payload.BoughtProductResponse;
 import net.mosur.spaceagency.service.OrderService;
 import net.mosur.spaceagency.service.ProductService;
 import net.mosur.spaceagency.service.UserService;
@@ -89,7 +89,7 @@ public class OrderControllerTest {
         product.setUrl("url");
         product1.setUrl("url");
 
-        ProductResponse productResponse = new ProductResponse();
+        BoughtProductResponse productResponse = new BoughtProductResponse();
         productResponse.setMissionName("test");
         productResponse.setUrl("url");
 

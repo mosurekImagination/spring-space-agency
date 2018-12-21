@@ -1,5 +1,8 @@
 package net.mosur.spaceagency.controller;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.ProductsOrder;
@@ -31,7 +34,6 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-
     @GetMapping("/history")
     @RolesAllowed("CUSTOMER")
     public ResponseEntity<?> getOrdersHistory(Principal principal) {
@@ -56,7 +58,6 @@ public class OrderController {
                 }});
     }
 
-
     @GetMapping("/popular/missions")
     @RolesAllowed("MANAGER")
     public ResponseEntity<?> getMostPopularMissions() {
@@ -76,4 +77,13 @@ public class OrderController {
                     put("products", products);
                 }});
     }
+
+}
+
+
+@Getter
+@JsonRootName("products")
+@NoArgsConstructor
+class BuyProductsParam {
+    private List<Long> productsIds;
 }

@@ -1,8 +1,10 @@
 package net.mosur.spaceagency.service;
 
+import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.repository.MissionRepository;
 import net.mosur.spaceagency.repository.ProductRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
@@ -22,21 +26,29 @@ import static org.junit.Assert.assertThat;
 
 @DataJpaTest
 @RunWith(SpringRunner.class)
-@Import(ProductService.class)
+@Import({ProductService.class, UserService.class, OrderService.class})
 public class ProductServiceTest {
 
     @Autowired
     ProductService productService;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    MissionRepository missionRepository;
+
     private final String ACQUISITION_DATE = "2018-12-19T23:25:41.880900700Z";
     private Product createdProduct;
 
     @Before
     public void setUp() throws Exception {
         Mission mission = new Mission("test", ImageryType.MULTISPECTRAL, Instant.now(), Instant.now());
-        createdProduct = new Product(mission, Instant.parse(ACQUISITION_DATE), null, new BigDecimal(100), "url");
+        List<Coordinate> coords = Arrays.asList(new Coordinate(-1, 1),
+                new Coordinate(1, 1),
+                new Coordinate(1, -1),
+                new Coordinate(-1, -1));
+        createdProduct = new Product(mission, Instant.parse(ACQUISITION_DATE), coords, new BigDecimal(100), "url");
 
+        missionRepository.save(mission);
         productRepository.save(createdProduct);
     }
 
@@ -59,4 +71,5 @@ public class ProductServiceTest {
         assertEquals(product.getId(), createdProduct.getId());
         assertEquals(product.getMission(), createdProduct.getMission());
     }
+
 }

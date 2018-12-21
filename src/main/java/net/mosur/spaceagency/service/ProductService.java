@@ -1,6 +1,10 @@
 package net.mosur.spaceagency.service;
 
+import net.mosur.raycasting.Point;
+import net.mosur.raycasting.Polygon;
+import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.domain.payload.BoughtProductResponse;
 import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +13,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static net.mosur.spaceagency.domain.specification.ProductSpecification.*;
 
 @Service
 public class ProductService {
 
+    private final ProductRepository productRepository;
+    private final OrderService orderService;
+
     @Autowired
-    ProductRepository productRepository;
+    public ProductService(ProductRepository productRepository, OrderService orderService) {
+        this.productRepository = productRepository;
+        this.orderService = orderService;
+    }
 
     public void save(Product product) {
         productRepository.save(product);
@@ -30,13 +41,27 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    public List<Product> findProductsWithCriteria(String missionName, String productType, String acquisitionDateFrom, String acquistionDateTo) {
+    public List<Product> findProductsWithCriteria(String missionName, String productType, String acquisitionDateFrom, String acquistionDateTo, Double longitude, Double latitude) {
         Specification<Product> specification = Specification.where(
                 hasMissionName(missionName)
                         .and(hasProductType(productType)
                                 .and(hasAcquisitionDateAfter(acquisitionDateFrom)
                                         .and(hasAcquisitionDateBefore(acquistionDateTo)))));
-        return productRepository.findAll(specification);
+        List<Product> products = productRepository.findAll(specification);
+
+        if (longitude == null || latitude == null) {
+            return products;
+        } else {
+            Point searchPoint = new Point(longitude, latitude);
+            return products.stream().filter(product -> hasPointInside(searchPoint, product)).collect(Collectors.toList());
+        }
+    }
+
+    private boolean hasPointInside(Point searchPoint, Product product) {
+        List<Coordinate> coords = product.getFootprint();
+        List<Point> points = coords.stream().map(coord -> new Point(coord.getLongitude(), coord.getLatitude())).collect(Collectors.toList());
+        Polygon polygon = new Polygon(points);
+        return polygon.contains(searchPoint);
     }
 
     public List<Product> getProductsByIds(List<Long> productsIds) {
@@ -44,7 +69,10 @@ public class ProductService {
     }
 
     public ProductResponse getProductResponseWithUrl(Product product, Long userId) {
-        return new ProductResponse(product, userId);
+        if (orderService.hasAccessToProduct(product, userId)) {
+            return new BoughtProductResponse(product);
+        }
+        return new ProductResponse(product);
     }
 
     public ProductResponse getProductResponse(Product product) {

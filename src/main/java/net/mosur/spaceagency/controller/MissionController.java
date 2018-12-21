@@ -71,7 +71,7 @@ public class MissionController {
     }
 
     private boolean imageryTypeNotExists(String imageryType) {
-        return !Arrays.stream(ImageryType.values()).anyMatch(type -> type.name().equals(imageryType));
+        return Arrays.stream(ImageryType.values()).noneMatch(type -> type.name().equals(imageryType));
     }
 
     @PutMapping(path = "/{name}")

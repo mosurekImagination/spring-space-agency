@@ -26,7 +26,7 @@ public class Product {
 
     private Instant acquisitionDate;
 
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     private List<Coordinate> footprint;
 
     private BigDecimal price;

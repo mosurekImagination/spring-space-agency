@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductsOrderRepository extends JpaRepository<ProductsOrder, Long> {
@@ -19,4 +20,8 @@ public interface ProductsOrderRepository extends JpaRepository<ProductsOrder, Lo
 
     @Query("Select products from ProductsOrder o inner join o.products as products group by products.id order by count(products.id) desc")
     List<Product> getMostOrderedProducts();
+
+    Optional<ProductsOrder> productsContainsAndAndUserId(Product product, long userId);
+
+
 }

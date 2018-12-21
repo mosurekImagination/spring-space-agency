@@ -10,6 +10,7 @@ import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
+import net.mosur.spaceagency.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -19,10 +20,12 @@ import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/products")
@@ -30,11 +33,13 @@ public class ProductController {
 
     private final ProductService productService;
     private final MissionService missionService;
+    private final UserService userService;
 
     @Autowired
-    public ProductController(ProductService productService, MissionService missionService) {
+    public ProductController(ProductService productService, MissionService missionService, UserService userService) {
         this.productService = productService;
         this.missionService = missionService;
+        this.userService = userService;
     }
 
     @PostMapping
@@ -77,19 +82,39 @@ public class ProductController {
         return productService.findById(id).map(product -> {
             productService.deleteById(id);
             return ResponseEntity.noContent().build();
-        }).orElseThrow(ResourceNotFoundException::new);
+        })
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
-    @GetMapping(path = "/search")
+    @GetMapping(path = "/")
     @RolesAllowed("CUSTOMER")
     public ResponseEntity<?> searchProducts(@RequestParam(value = "missionName", required = false) String missionName,
                                             @RequestParam(value = "productType", required = false) String productType,
                                             @RequestParam(value = "acquisitionDateFrom ", required = false) String acquisitionDateFrom,
-                                            @RequestParam(value = "acquistionDateTo", required = false) String acquisitionDateTo) {
-        List<Product> products = productService.findProductsWithCriteria(missionName, productType, acquisitionDateFrom, acquisitionDateTo);
-        return ResponseEntity.ok(products.stream().map(productService::getProductResponse));
+                                            @RequestParam(value = "acquistionDateTo", required = false) String acquisitionDateTo,
+                                            @RequestParam(value = "longitude", required = false) Double longitude,
+                                            @RequestParam(value = "latitude", required = false) Double latitude) {
+        List<Product> products = productService.findProductsWithCriteria(missionName, productType, acquisitionDateFrom, acquisitionDateTo, longitude, latitude);
+        return ResponseEntity.ok(new HashMap<String, Object>() {{
+            put("products", products.stream().map(productService::getProductResponse));
+        }});
     }
 
+    @GetMapping(path = "/{id}")
+    @RolesAllowed("CUSTOMER")
+    public ResponseEntity<?> getProduct(@PathVariable(name = "id") long productId,
+                                        Principal principal) {
+        long userId = userService.getUserId(principal);
+        return productService.findById(productId).map(product ->
+                ResponseEntity.ok(productResponse(product, userId)))
+                .orElseThrow(ResourceNotFoundException::new);
+    }
+
+    private Map<String, Object> productResponse(Product product, long userId) {
+        return new HashMap<String, Object>() {{
+            put("product", productService.getProductResponseWithUrl(product, userId));
+        }};
+    }
 }
 
 @Getter
@@ -103,14 +128,9 @@ class NewProductParam{
     private String url = "";
     @NotBlank(message = "can't be empty")
     private String price = "";
+    @NotBlank(message = "can't be empty")
     private String acquisitionDate = "";
 
 }
 
-@Getter
-@JsonRootName("products")
-@NoArgsConstructor
-class BuyProductsParam{
-    private List<Long> productsIds;
-}
 

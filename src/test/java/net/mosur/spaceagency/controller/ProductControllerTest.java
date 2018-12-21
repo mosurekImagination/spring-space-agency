@@ -6,12 +6,14 @@ import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
+import net.mosur.spaceagency.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ProductController.class)
+@Import({ProductService.class, UserService.class})
 public class ProductControllerTest {
 
     @Autowired
@@ -106,16 +109,14 @@ public class ProductControllerTest {
         Product product1 = new Product();
         product.setId(2L);
 
-        when(productService.findProductsWithCriteria(any(), any(), any(), any()))
+        when(productService.findProductsWithCriteria(any(), any(), any(), any(), any(), any()))
                 .thenReturn(Arrays.asList(product, product1));
         given()
                 .contentType("application/json")
                 .when()
-                .get("/products/search")
+                .get("/products/")
                 .then()
                 .statusCode(200);
-
-
     }
 
     private Map<String, Object> prepareCreateProductParameter(String missionName, String acquisitionDate, String price, String url) {

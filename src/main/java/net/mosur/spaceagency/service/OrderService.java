@@ -12,9 +12,12 @@ import java.util.List;
 @Service
 public class OrderService {
 
-    @Autowired
-    ProductsOrderRepository productsOrderRepository;
+    private final ProductsOrderRepository productsOrderRepository;
 
+    @Autowired
+    public OrderService(ProductsOrderRepository productsOrderRepository) {
+        this.productsOrderRepository = productsOrderRepository;
+    }
 
     public ProductsOrder makeOrder(List<Product> products, long userId) {
         ProductsOrder order = new ProductsOrder(userId, products);
@@ -32,5 +35,9 @@ public class OrderService {
 
     public List<Product> getMostPopularProducts() {
         return productsOrderRepository.getMostOrderedProducts();
+    }
+
+    public boolean hasAccessToProduct(Product product, long userId) {
+        return productsOrderRepository.productsContainsAndAndUserId(product, userId).isPresent();
     }
 }
