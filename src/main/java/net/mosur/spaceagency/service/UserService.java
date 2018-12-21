@@ -7,6 +7,7 @@ import java.security.Principal;
 
 @Service
 public class UserService {
+
     //MOCKED USERS
     public long getUserId(Principal principal) {
         switch (principal.getName()) {
