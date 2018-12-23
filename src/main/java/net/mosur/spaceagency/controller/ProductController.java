@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.Instant;
@@ -123,6 +124,7 @@ public class ProductController {
 class NewProductParam{
     @NotBlank(message = "can't be empty")
     private String missionName = "";
+    @Size(min = 3)
     private List<Coordinate> footprint = new ArrayList<>();
     @NotBlank(message = "can't be empty")
     private String url = "";

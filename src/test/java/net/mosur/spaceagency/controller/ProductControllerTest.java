@@ -1,6 +1,7 @@
 package net.mosur.spaceagency.controller;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
@@ -18,10 +19,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -46,13 +44,13 @@ public class ProductControllerTest {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
     }
 
     @Test
     @WithMockUser
-    public void should_create_product_success() throws Exception {
+    public void should_create_product_success() {
         String missionName = "TestName";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String acquisitionDate = "2018-12-18T22:21:38.175691600Z";
@@ -68,7 +66,14 @@ public class ProductControllerTest {
 
         when(missionService.findByMissionName(eq(missionName))).thenReturn(Optional.of(mission));
 
-        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url);
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
+                Arrays.asList(
+                        new Coordinate(1, 1),
+                        new Coordinate(-1, 1),
+                        new Coordinate(1, -1),
+                        new Coordinate(-1, -1)
+                )
+        );
 
         given()
                 .contentType("application/json")
@@ -84,7 +89,41 @@ public class ProductControllerTest {
 
     @Test
     @WithMockUser
-    public void should_delete_product_success() throws Exception {
+    public void should_create_product_without_coords_fail() {
+        String missionName = "TestName";
+        String imageryType = ImageryType.MULTISPECTRAL.toString();
+        String acquisitionDate = "2018-12-18T22:21:38.175691600Z";
+        String price = "100.00";
+        String url = "http://asdf.pl";
+
+        Product product = new Product();
+        Mission mission = new Mission();
+        mission.update(missionName, imageryType, "", "");
+
+        product.setId(1L);
+        product.setMission(mission);
+
+        when(missionService.findByMissionName(eq(missionName))).thenReturn(Optional.of(mission));
+
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
+                Arrays.asList(
+                        new Coordinate(1, 1)
+                )
+        );
+
+        given()
+                .contentType("application/json")
+                .body(param)
+                .when()
+                .post("/products/")
+                .then()
+                .statusCode(422)
+                .body("errors.footprint.size()", equalTo(1));
+    }
+
+    @Test
+    @WithMockUser
+    public void should_delete_product_success() {
         Long productId = 1L;
         Product product = new Product();
         product.setId(1L);
@@ -103,7 +142,7 @@ public class ProductControllerTest {
 
     @Test
     @WithMockUser
-    public void should_search_product_success() throws Exception {
+    public void should_search_product_success() {
         Product product = new Product();
         product.setId(1L);
         Product product1 = new Product();
@@ -119,12 +158,13 @@ public class ProductControllerTest {
                 .statusCode(200);
     }
 
-    private Map<String, Object> prepareCreateProductParameter(String missionName, String acquisitionDate, String price, String url) {
+    private Map<String, Object> prepareCreateProductParameter(String missionName, String acquisitionDate, String price, String url, List<Coordinate> coords) {
         return new HashMap<String, Object>() {{
             put("missionName", missionName);
             put("acquisitionDate", acquisitionDate);
             put("price", price);
             put("url", url);
+            put("footprint", coords);
         }};
     }
 }

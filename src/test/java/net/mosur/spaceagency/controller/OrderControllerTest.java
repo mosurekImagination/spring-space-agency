@@ -18,9 +18,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -43,13 +41,13 @@ public class OrderControllerTest {
     private OrderService orderService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
     }
 
     @Test
     @WithMockUser
-    public void should_return_order_history_success() throws Exception {
+    public void should_return_order_history_success() {
         Product product = new Product();
         product.setId(1L);
         product.setUrl("url");
@@ -76,7 +74,7 @@ public class OrderControllerTest {
 
     @Test
     @WithMockUser
-    public void should_buy_product_success() throws Exception {
+    public void should_order_more_products_success() {
         List<Long> productIds = Arrays.asList(1L, 2L);
         Product product = new Product();
         product.setId(1L);
@@ -116,7 +114,93 @@ public class OrderControllerTest {
 
     @Test
     @WithMockUser
-    public void should_return_most_ordered_products_success() throws Exception {
+    public void should_order_non_existent_product_fail() {
+        List<Long> productIds = Arrays.asList(1L, 2L);
+        Product product = new Product();
+        product.setId(1L);
+        Mission mission = new Mission();
+        mission.setMissionName("test");
+        product.setMission(mission);
+        product.setUrl("url");
+
+        BoughtProductResponse productResponse = new BoughtProductResponse();
+        productResponse.setMissionName("test");
+        productResponse.setUrl("url");
+
+        HashMap<String, Object> params = new HashMap<String, Object>() {{
+            put("productsIds", productIds);
+        }};
+        when(productService.getProductsByIds(any())).thenReturn(Arrays.asList(product));
+        when(productService.getProductResponseWithUrl(any(), any())).thenReturn(productResponse);
+        when(userService.getUserId(any())).thenReturn(1L);
+
+        given()
+                .contentType("application/json")
+                .body(params)
+                .when()
+                .post("/orders/")
+                .then()
+                .statusCode(422)
+                .body("errors.productsIds[0]", equalTo("One of selected products not exists"));
+    }
+
+    @Test
+    @WithMockUser
+    public void should_order_one_product_success() {
+        List<Long> productIds = Arrays.asList(1L);
+        Product product = new Product();
+        product.setId(1L);
+        Mission mission = new Mission();
+        mission.setMissionName("test");
+        product.setMission(mission);
+        product.setUrl("url");
+
+        BoughtProductResponse productResponse = new BoughtProductResponse();
+        productResponse.setMissionName("test");
+        productResponse.setUrl("url");
+
+        HashMap<String, Object> params = new HashMap<String, Object>() {{
+            put("productsIds", productIds);
+        }};
+        when(productService.getProductsByIds(any())).thenReturn(Collections.singletonList(product));
+        when(productService.getProductResponseWithUrl(any(), any())).thenReturn(productResponse);
+        when(userService.getUserId(any())).thenReturn(1L);
+
+        given()
+                .contentType("application/json")
+                .body(params)
+                .when()
+                .post("/orders/")
+                .then()
+                .statusCode(200)
+                .body("boughtProducts.size()", equalTo(1))
+                .body("boughtProducts[0].missionName", equalTo("test"))
+                .body("boughtProducts[0].url", equalTo("url"));
+
+        verify(orderService).makeOrder(any(), anyLong());
+    }
+
+    @Test
+    @WithMockUser
+    public void should_buy_product_with_empty_param_fail() {
+
+        HashMap<String, Object> params = new HashMap<String, Object>() {{
+            put("productsIds", new ArrayList<>());
+        }};
+
+        given()
+                .contentType("application/json")
+                .body(params)
+                .when()
+                .post("/orders/")
+                .then()
+                .statusCode(422)
+                .body("errors.productsIds[0]", equalTo("Products not exists"));
+    }
+
+    @Test
+    @WithMockUser
+    public void should_return_most_ordered_products_success() {
         Product product = new Product();
         product.setId(1L);
         product.setUrl("url");
@@ -138,7 +222,7 @@ public class OrderControllerTest {
 
     @Test
     @WithMockUser
-    public void should_return_most_ordered_missions_success() throws Exception {
+    public void should_return_most_ordered_missions_success() {
         Mission mission = new Mission();
         mission.setMissionName("test");
         Mission mission1 = new Mission();

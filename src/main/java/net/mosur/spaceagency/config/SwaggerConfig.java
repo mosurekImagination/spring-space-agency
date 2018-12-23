@@ -18,4 +18,12 @@ public class SwaggerConfig {
                 .build();
     }
 
+//    @Bean
+//    public ApiInfo apiInfo() {
+//        return new ApiInfoBuilder()
+//                .title("Space Agency DataHub API")
+//                .version("1.0.0")
+//                .build();
+//    }
+
 }

@@ -37,7 +37,7 @@ public class MissionServiceTest {
     private Mission createdMission;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         createdMission = new Mission(MISSION_NAME, IMAGERY_TYPE, Instant.parse(START_DATE), Instant.parse(FINISH_DATE));
         missionRepository.save(createdMission);
     }

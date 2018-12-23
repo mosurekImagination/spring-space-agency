@@ -38,7 +38,7 @@ public class UserServiceTest {
     }
 
     @Test(expected = ResourceNotFoundException.class)
-    public void should_return_id_for_random_user_fail() throws Exception {
+    public void should_return_id_for_random_user_fail() {
         Principal mockPrincipal = Mockito.mock(Principal.class);
         Mockito.when(mockPrincipal.getName()).thenReturn("qwerqwer");
         long id = userService.getUserId(mockPrincipal);

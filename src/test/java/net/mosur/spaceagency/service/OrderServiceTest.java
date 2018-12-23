@@ -30,7 +30,7 @@ public class OrderServiceTest {
     ProductsOrderRepository productsOrderRepository;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
     }
 
     @Test

@@ -3,6 +3,7 @@ package net.mosur.spaceagency.controller;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
@@ -37,6 +38,50 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @PostMapping
+    @RolesAllowed("CUSTOMER")
+    public ResponseEntity<?> orderProducts(@Valid @RequestBody OrderProductsParam orderProductsParam,
+                                           Principal principal,
+                                           BindingResult bindingResult) { //TO-DO
+        Long userId = userService.getUserId(principal);
+        List<Product> products = productService.getProductsByIds(orderProductsParam.getProductsIds());
+        checkInput(userId, products, bindingResult, orderProductsParam);
+        checkIfUserOrderedProductsAlready(userId, products, bindingResult);
+        orderService.makeOrder(products, userId);
+        return ResponseEntity.ok(
+                new HashMap<String, Object>() {{
+                    put("boughtProducts", products.stream().map(product -> productService.getProductResponseWithUrl(product, userId)));
+                }});
+    }
+
+    private void checkInput(Long userId, List<Product> products, BindingResult bindingResult, OrderProductsParam params) {
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(bindingResult);
+        }
+        if (products.isEmpty()) {
+            bindingResult.rejectValue("productsIds", "INCORRECT PRODUCTS", "Products not exists");
+        }
+        if (products.size() != params.getProductsIds().size()) {
+            bindingResult.rejectValue("productsIds", "INCORRECT PRODUCTS", "One of selected products not exists");
+        }
+        checkIfUserOrderedProductsAlready(userId, products, bindingResult);
+        if (bindingResult.hasErrors()) {
+            throw new InvalidRequestException(bindingResult);
+        }
+    }
+
+    private void checkIfUserOrderedProductsAlready(Long userId, List<Product> products, BindingResult bindingResult) {
+        List<Long> boughtProductsIds = new ArrayList<>();
+        products.forEach(product -> {
+            if (orderService.hasAccessToProduct(product, userId)) {
+                boughtProductsIds.add(product.getId());
+            }
+        });
+        if (!boughtProductsIds.isEmpty()) {
+            bindingResult.rejectValue("productsIds", "PRODUCT ORDERED", "Product with Ids bought before: " + boughtProductsIds);
+        }
+    }
+
     @GetMapping("/history")
     @RolesAllowed("CUSTOMER")
     public ResponseEntity<?> getOrdersHistory(Principal principal) {
@@ -46,34 +91,6 @@ public class OrderController {
                 new HashMap<String, Object>() {{
                     put("orders", ordersHistory);
                 }});
-    }
-
-    @PostMapping
-    @RolesAllowed("CUSTOMER")
-    public ResponseEntity<?> buyProducts(@Valid @RequestBody BuyProductsParam buyProductsParam,
-                                         Principal principal,
-                                         BindingResult bindingResult) {
-        Long userId = userService.getUserId(principal);
-        List<Product> products = productService.getProductsByIds(buyProductsParam.getProductsIds());
-        checkIfUserBoughtProductsAlready(userId, products, bindingResult);
-        orderService.makeOrder(products, userId);
-        return ResponseEntity.ok(
-                new HashMap<String, Object>() {{
-                    put("boughtProducts", products.stream().map(product -> productService.getProductResponseWithUrl(product, userId)));
-                }});
-    }
-
-    private void checkIfUserBoughtProductsAlready(Long userId, List<Product> products, BindingResult bindingResult) {
-        List<Long> boughtProductsIds = new ArrayList<>();
-        products.forEach(product -> {
-            if (orderService.hasAccessToProduct(product, userId)) {
-                boughtProductsIds.add(product.getId());
-            }
-        });
-        if (!boughtProductsIds.isEmpty() || bindingResult.hasErrors()) {
-            bindingResult.rejectValue("productsIds", "PRODUCT BOUGHT", "Product with Ids bought already: " + boughtProductsIds);
-            throw new InvalidRequestException(bindingResult);
-        }
     }
 
     @GetMapping("/popular/missions")
@@ -98,11 +115,10 @@ public class OrderController {
 
 }
 
-
 @Getter
-@JsonRootName("products")
+@Setter
+@JsonRootName("product")
 @NoArgsConstructor
-class BuyProductsParam {
-
+class OrderProductsParam {
     private List<Long> productsIds;
 }

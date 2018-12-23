@@ -39,7 +39,7 @@ public class ProductsOrderRepositoryTest {
     private Mission mission2;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mission2 = new Mission("test1", ImageryType.MULTISPECTRAL, Instant.now(), Instant.now());
         mission1 = new Mission("test2", ImageryType.MULTISPECTRAL, Instant.now(), Instant.now());
         productMission1 = new Product(mission2, Instant.parse("2018-12-19T23:25:41.880900700Z"), null, BigDecimal.valueOf(100), "url");

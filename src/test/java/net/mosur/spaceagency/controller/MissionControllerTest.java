@@ -43,7 +43,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_create_mission_success_all_parameters() throws Exception {
+    public void should_create_mission_success_all_parameters() {
         String missionName = "TestName";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -79,7 +79,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_create_mission_without_dates() throws Exception {
+    public void should_create_mission_without_dates() {
         String missionName = "TestName";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "";
@@ -112,7 +112,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_show_error_message_for_blank_mission_name() throws Exception {
+    public void should_show_error_message_for_blank_mission_name() {
         String missionName = "";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -132,7 +132,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_show_error_message_for_blank_imagery_type() throws Exception {
+    public void should_show_error_message_for_blank_imagery_type() {
         String missionName = "testName";
         String imageryType = "";
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -152,7 +152,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_show_error_message_for_bad_imagery_type() throws Exception {
+    public void should_show_error_message_for_bad_imagery_type() {
         String missionName = "testName";
         String imageryType = "asdf";
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -172,7 +172,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_show_error_message_for_duplicated_mission_name() throws Exception {
+    public void should_show_error_message_for_duplicated_mission_name() {
         String missionName = "TestMission";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -200,7 +200,7 @@ public class MissionControllerTest {
     }
 
     @Test
-    public void should_return_unauthorized() throws Exception {
+    public void should_return_unauthorized() {
         String missionName = "TestMission";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -226,7 +226,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_update_mission_success_all_parameters() throws Exception {
+    public void should_update_mission_success_all_parameters() {
         String missionName = "TestName";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "2018-12-16T22:21:38.175691600Z";
@@ -262,7 +262,7 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
-    public void should_show_error_updated_mission_doesnt_exists() throws Exception {
+    public void should_show_error_updated_mission_doesnt_exists() {
         String missionName = "TestName";
         String imageryType = ImageryType.MULTISPECTRAL.toString();
         String startDate = "2018-12-16T22:21:38.175691600Z";

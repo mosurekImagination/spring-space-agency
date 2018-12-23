@@ -40,7 +40,7 @@ public class ProductServiceTest {
     private Product createdProduct;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Mission mission = new Mission("test", ImageryType.MULTISPECTRAL, Instant.now(), Instant.now());
         List<Coordinate> coords = Arrays.asList(new Coordinate(-1, 1),
                 new Coordinate(1, 1),
