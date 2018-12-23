@@ -1,9 +1,9 @@
 package net.mosur.spaceagency.repository;
 
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.ProductsOrder;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

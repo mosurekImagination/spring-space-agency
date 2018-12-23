@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.mosur.spaceagency.domain.exception.InvalidRequestException;
 import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import net.mosur.spaceagency.service.MissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -73,11 +73,11 @@ public class MissionController {
         return Arrays.stream(ImageryType.values()).noneMatch(type -> type.name().equals(imageryType));
     }
 
-    @PutMapping(path = "/{name}")
+    @PutMapping(path = "/{id}")
     @RolesAllowed("MANAGER")
-    public ResponseEntity<?> updateMission(@PathVariable("name") String missionName,
+    public ResponseEntity<?> updateMission(@PathVariable("id") long missionId,
                                            @Valid @RequestBody UpdateMissionParam updateMissionParam) {
-        return missionService.findByMissionName(missionName).map(mission -> {
+        return missionService.findById(missionId).map(mission -> {
                     mission.update(updateMissionParam.getMissionName(),
                             updateMissionParam.getImageryType(),
                             updateMissionParam.getStartDate(),
@@ -88,11 +88,11 @@ public class MissionController {
         ).orElseThrow(ResourceNotFoundException::new);
     }
 
-    @DeleteMapping(path = "/{name}")
+    @DeleteMapping(path = "/{id}")
     @RolesAllowed("MANAGER")
-    public ResponseEntity<?> deleteMission(@PathVariable("name") String missionName) {
+    public ResponseEntity<?> deleteMission(@PathVariable("id") long missionId) {
 
-        return missionService.findByMissionName(missionName).map(mission ->{
+        return missionService.findById(missionId).map(mission -> {
             missionService.delete(mission);
             return ResponseEntity.noContent().build();
         }).orElseThrow(ResourceNotFoundException::new);

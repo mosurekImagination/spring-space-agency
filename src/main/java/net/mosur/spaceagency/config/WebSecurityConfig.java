@@ -1,4 +1,4 @@
-package net.mosur.spaceagency.security;
+package net.mosur.spaceagency.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;

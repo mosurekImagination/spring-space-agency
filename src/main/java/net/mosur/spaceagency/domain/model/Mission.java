@@ -3,6 +3,7 @@ package net.mosur.spaceagency.domain.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 
 import javax.persistence.*;
 import java.time.Instant;

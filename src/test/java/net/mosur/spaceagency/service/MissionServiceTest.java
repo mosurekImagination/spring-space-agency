@@ -1,7 +1,7 @@
 package net.mosur.spaceagency.service;
 
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import net.mosur.spaceagency.repository.MissionRepository;
 import org.junit.Before;
 import org.junit.Test;

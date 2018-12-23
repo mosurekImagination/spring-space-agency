@@ -1,9 +1,9 @@
 package net.mosur.spaceagency.domain.specification;
 
 import lombok.AllArgsConstructor;
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.Join;

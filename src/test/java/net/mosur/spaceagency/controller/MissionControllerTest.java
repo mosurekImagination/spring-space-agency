@@ -1,8 +1,8 @@
 package net.mosur.spaceagency.controller;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import net.mosur.spaceagency.service.MissionService;
 import org.junit.Before;
 import org.junit.Test;
@@ -248,7 +248,7 @@ public class MissionControllerTest {
                 .contentType("application/json")
                 .body(param)
                 .when()
-                .put("/missions/{missionName}", missionName)
+                .put("/missions/{id}", 1L)
                 .then()
                 .statusCode(200)
                 .body("mission.id", equalTo(1))
@@ -274,7 +274,7 @@ public class MissionControllerTest {
                 .contentType("application/json")
                 .body(param)
                 .when()
-                .put("/missions/{missionName}", missionName)
+                .put("/missions/{id}", 1L)
                 .then()
                 .statusCode(404);
     }

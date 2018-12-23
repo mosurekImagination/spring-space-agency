@@ -49,12 +49,16 @@ public class ProductService {
                                         .and(hasAcquisitionDateBefore(acquistionDateTo)))));
         List<Product> products = productRepository.findAll(specification);
 
-        if (longitude == null || latitude == null) {
-            return products;
+        if (longitude != null && latitude != null) {
+            return getProductsCoveringPoint(longitude, latitude, products);
         } else {
-            Point searchPoint = new Point(longitude, latitude);
-            return products.stream().filter(product -> hasPointInside(searchPoint, product)).collect(Collectors.toList());
+            return products;
         }
+    }
+
+    private List<Product> getProductsCoveringPoint(Double longitude, Double latitude, List<Product> products) {
+        Point searchPoint = new Point(longitude, latitude);
+        return products.stream().filter(product -> hasPointInside(searchPoint, product)).collect(Collectors.toList());
     }
 
     private boolean hasPointInside(Point searchPoint, Product product) {

@@ -1,9 +1,9 @@
 package net.mosur.spaceagency.service;
 
 import net.mosur.spaceagency.domain.model.Coordinate;
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import net.mosur.spaceagency.repository.MissionRepository;
 import net.mosur.spaceagency.repository.ProductRepository;
 import org.junit.Before;
@@ -70,6 +70,13 @@ public class ProductServiceTest {
 
         assertEquals(product.getId(), createdProduct.getId());
         assertEquals(product.getMission(), createdProduct.getMission());
+    }
+
+    @Test
+    public void should_find_by_id_fail() {
+        Optional<Product> optional = productService.findById(createdProduct.getId() + 1);
+        assertThat(optional.isPresent(), is(false));
+
     }
 
 }

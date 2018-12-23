@@ -1,8 +1,8 @@
 package net.mosur.spaceagency.repository;
 
-import net.mosur.spaceagency.domain.model.ImageryType;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
+import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,42 +43,49 @@ public class ProductRepositoryTest {
         product = new Product(mission, Instant.parse(ACQUISITION_DATE), null, BigDecimal.valueOf(100), "url");
 
         missionRepository.save(mission);
-    }
-
-    @Test
-    public void findAll() {
+        productRepository.save(product);
     }
 
     @Test
     public void should_create_and_fetch_product_success() {
-        productRepository.save(product);
         Optional<Product> optional = productRepository.findById(product.getId());
         assertThat(optional.isPresent(), is(true));
+        assertThat(optional.get().getId(), is(product.getId()));
     }
 
     @Test
     public void should_find_products_via_mission_name_success() {
-        productRepository.save(product);
         Specification<Product> specification = hasMissionName(MISSION_NAME);
         List<Product> products = productRepository.findAll(Specification.where(specification));
         assertThat(products.isEmpty(), is(false));
         assertThat(product, isIn(products));
+    }
 
+    @Test
+    public void should_find_products_via_mission_name_fail() {
+        productRepository.save(product);
+        Specification<Product> specification = hasMissionName(MISSION_NAME + "asdf");
+        List<Product> products = productRepository.findAll(Specification.where(specification));
+        assertThat(products.isEmpty(), is(true));
     }
 
     @Test
     public void should_find_products_via_product_type_success() {
-        productRepository.save(product);
         Specification<Product> specification = hasProductType(IMAGERY_TYPE.toString());
         List<Product> products = productRepository.findAll(Specification.where(specification));
         assertThat(products.isEmpty(), is(false));
         assertThat(product, isIn(products));
+    }
 
+    @Test
+    public void should_find_products_via_product_type_fail() {
+        Specification<Product> specification = hasProductType(ImageryType.HYPERSPECTRAL.toString());
+        List<Product> products = productRepository.findAll(Specification.where(specification));
+        assertThat(products.isEmpty(), is(true));
     }
 
     @Test
     public void should_find_products_via_acquisition_date_before_success() {
-        productRepository.save(product);
         Instant time = Instant.parse(ACQUISITION_DATE);
         Instant beforeTime = time.plusSeconds(-1);
         Specification<Product> specification = hasAcquisitionDateBefore(beforeTime.toString());
@@ -89,13 +96,21 @@ public class ProductRepositoryTest {
 
     @Test
     public void should_find_products_via_acquisition_date_after_success() {
-        productRepository.save(product);
         Instant time = Instant.parse(ACQUISITION_DATE);
         Instant aftertime = time.plusSeconds(1);
         Specification<Product> specification = hasAcquisitionDateAfter(aftertime.toString());
         List<Product> products = productRepository.findAll(Specification.where(specification));
         assertThat(products.isEmpty(), is(false));
         assertThat(product, isIn(products));
+    }
+
+    @Test
+    public void should_find_products_via_acquisition_date_after_fail() {
+        Instant time = Instant.parse(ACQUISITION_DATE);
+        Instant aftertime = time.plusSeconds(-1);
+        Specification<Product> specification = hasAcquisitionDateAfter(aftertime.toString());
+        List<Product> products = productRepository.findAll(Specification.where(specification));
+        assertThat(products.isEmpty(), is(true));
     }
 
     @Test
@@ -111,8 +126,18 @@ public class ProductRepositoryTest {
     }
 
     @Test
-    public void should_find_products_via_two_criteria_success() {
+    public void should_find_products_via_acquisition_date_between_fail() {
         productRepository.save(product);
+        Instant time = Instant.parse(ACQUISITION_DATE);
+        Instant timeAfter = time.plusSeconds(-5);
+        Instant timeBefore = time.minusSeconds(10);
+        Specification<Product> specification = hasAcquisitionDateBetween(timeBefore.toString(), timeAfter.toString());
+        List<Product> products = productRepository.findAll(Specification.where(specification));
+        assertThat(products.isEmpty(), is(true));
+    }
+
+    @Test
+    public void should_find_products_via_two_criteria_success() {
         Product product1 = new Product(product.getMission(), product.getAcquisitionDate().plusSeconds(10), null, BigDecimal.valueOf(150), "url");
         productRepository.save(product1);
         Instant time = Instant.parse(ACQUISITION_DATE);
@@ -127,7 +152,6 @@ public class ProductRepositoryTest {
 
     @Test
     public void should_find_products_via_two_criteria_failed() {
-        productRepository.save(product);
         Product product1 = new Product(product.getMission(), product.getAcquisitionDate().plusSeconds(10), null, BigDecimal.valueOf(150), "url");
         productRepository.save(product1);
         Instant time = Instant.parse(ACQUISITION_DATE);
@@ -142,7 +166,6 @@ public class ProductRepositoryTest {
 
     @Test
     public void should_find_products_via_two_or_criteria_success() {
-        productRepository.save(product);
         Product product1 = new Product(product.getMission(), product.getAcquisitionDate().plusSeconds(10), null, BigDecimal.valueOf(150), "url");
         productRepository.save(product1);
         Instant time = Instant.parse(ACQUISITION_DATE);
@@ -157,7 +180,6 @@ public class ProductRepositoryTest {
 
     @Test
     public void should_find_products_via_acquisition_date_between_same_date_failed() {
-        productRepository.save(product);
         Instant time = Instant.parse(ACQUISITION_DATE);
         Instant timeAfter = time.plusSeconds(0);
         Instant timeBefore = time.minusSeconds(1);
