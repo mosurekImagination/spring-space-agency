@@ -21,8 +21,8 @@ public class OrderService {
 
     public ProductsOrder makeOrder(List<Product> products, long userId) {
         ProductsOrder order = new ProductsOrder(userId, products);
-        productsOrderRepository.save(order);
-        return order;
+        ProductsOrder saved = productsOrderRepository.save(order);
+        return saved;
     }
 
     public List<ProductsOrder> getOrdersHistory(Long userId) {

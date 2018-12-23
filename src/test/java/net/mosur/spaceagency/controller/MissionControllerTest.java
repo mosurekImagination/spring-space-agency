@@ -38,7 +38,7 @@ public class MissionControllerTest {
     private MissionService missionService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
     }
 

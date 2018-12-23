@@ -34,8 +34,8 @@ public class Polygon {
 
     public boolean contains(Point p) {
         int count = 0;
-        for (int i = 0; i < sides.size(); i++) {
-            if (intersectSegment(p, sides.get(i))) {
+        for (Side side : sides) {
+            if (intersectSegment(p, side)) {
                 count++;
             }
         }

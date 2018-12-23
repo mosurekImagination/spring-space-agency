@@ -18,9 +18,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -54,10 +58,10 @@ public class OrderControllerTest {
         Product product1 = new Product();
         product.setId(2L);
         product.setUrl("url");
-        ProductsOrder order = new ProductsOrder(1L, Arrays.asList(product, product1));
+        ProductsOrder order = new ProductsOrder(1L, asList(product, product1));
 
         when(userService.getUserId(any())).thenReturn(1L);
-        when(orderService.getOrdersHistory(1L)).thenReturn(Arrays.asList(order));
+        when(orderService.getOrdersHistory(1L)).thenReturn(singletonList(order));
 
         given()
                 .contentType("application/json")
@@ -75,7 +79,7 @@ public class OrderControllerTest {
     @Test
     @WithMockUser
     public void should_order_more_products_success() {
-        List<Long> productIds = Arrays.asList(1L, 2L);
+        List<Long> productIds = asList(1L, 2L);
         Product product = new Product();
         product.setId(1L);
         Product product1 = new Product();
@@ -94,7 +98,7 @@ public class OrderControllerTest {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("productsIds", productIds);
         }};
-        when(productService.getProductsByIds(any())).thenReturn(Arrays.asList(product, product1));
+        when(productService.getProductsByIds(any())).thenReturn(asList(product, product1));
         when(productService.getProductResponseWithUrl(any(), any())).thenReturn(productResponse);
         when(userService.getUserId(any())).thenReturn(1L);
 
@@ -115,7 +119,7 @@ public class OrderControllerTest {
     @Test
     @WithMockUser
     public void should_order_non_existent_product_fail() {
-        List<Long> productIds = Arrays.asList(1L, 2L);
+        List<Long> productIds = asList(1L, 2L);
         Product product = new Product();
         product.setId(1L);
         Mission mission = new Mission();
@@ -130,7 +134,7 @@ public class OrderControllerTest {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("productsIds", productIds);
         }};
-        when(productService.getProductsByIds(any())).thenReturn(Arrays.asList(product));
+        when(productService.getProductsByIds(any())).thenReturn(singletonList(product));
         when(productService.getProductResponseWithUrl(any(), any())).thenReturn(productResponse);
         when(userService.getUserId(any())).thenReturn(1L);
 
@@ -147,7 +151,7 @@ public class OrderControllerTest {
     @Test
     @WithMockUser
     public void should_order_one_product_success() {
-        List<Long> productIds = Arrays.asList(1L);
+        List<Long> productIds = singletonList(1L);
         Product product = new Product();
         product.setId(1L);
         Mission mission = new Mission();
@@ -162,7 +166,7 @@ public class OrderControllerTest {
         HashMap<String, Object> params = new HashMap<String, Object>() {{
             put("productsIds", productIds);
         }};
-        when(productService.getProductsByIds(any())).thenReturn(Collections.singletonList(product));
+        when(productService.getProductsByIds(any())).thenReturn(singletonList(product));
         when(productService.getProductResponseWithUrl(any(), any())).thenReturn(productResponse);
         when(userService.getUserId(any())).thenReturn(1L);
 
@@ -208,7 +212,7 @@ public class OrderControllerTest {
         product.setId(2L);
         product.setUrl("url");
 
-        when(orderService.getMostPopularProducts()).thenReturn(Arrays.asList(product, product1));
+        when(orderService.getMostPopularProducts()).thenReturn(asList(product, product1));
         given()
                 .contentType("application/json")
                 .when()
@@ -228,7 +232,7 @@ public class OrderControllerTest {
         Mission mission1 = new Mission();
         mission1.setMissionName("test2");
 
-        when(orderService.getMostPopularMissions()).thenReturn(Arrays.asList(mission, mission1));
+        when(orderService.getMostPopularMissions()).thenReturn(asList(mission, mission1));
         given()
                 .contentType("application/json")
                 .when()
