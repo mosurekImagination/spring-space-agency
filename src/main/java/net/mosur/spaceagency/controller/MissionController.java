@@ -87,8 +87,13 @@ public class MissionController {
     @PutMapping(path = "/{id}")
     @RolesAllowed("MANAGER")
     public ResponseEntity<?> updateMission(@PathVariable("id") long missionId,
-                                           @Valid @RequestBody UpdateMissionParam updateMissionParam) {
+                                           @Valid @RequestBody UpdateMissionParam updateMissionParam,
+                                           BindingResult bindingResult) {
         return missionService.findById(missionId).map(mission -> {
+                    if (missionService.findByMissionName(updateMissionParam.getMissionName()).isPresent()) {
+                        bindingResult.rejectValue("missionName", "BAD NAME", "Mission with that name already exists!");
+                        throw new InvalidRequestException(bindingResult);
+                    }
                     mission.update(updateMissionParam.getMissionName(),
                             updateMissionParam.getImageryType(),
                             updateMissionParam.getStartDate(),

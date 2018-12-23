@@ -17,6 +17,8 @@ public interface ProductsOrderRepository extends JpaRepository<ProductsOrder, Lo
 
     Optional<ProductsOrder> productsContainsAndAndUserId(Product product, long userId);
 
+    List<ProductsOrder> findAllByProductsContains(Product product);
+
     //NOT contains missions without orders
     @Query("Select products.mission from ProductsOrder o inner join o.products as products group by products.mission order by count(products.mission.id) desc")
     List<Mission> getMostOrderedMissions();

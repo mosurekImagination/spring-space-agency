@@ -301,6 +301,25 @@ public class ProductControllerTest {
 
     @Test
     @WithMockUser
+    public void should_show_error_deleting_product_with_orders() {
+        Long productId = 1L;
+        Product product = new Product();
+        product.setId(1L);
+
+        when(productService.findById(eq(1L))).thenReturn(Optional.of(product));
+        when(productService.hasOrders(any())).thenReturn(true);
+
+        given()
+                .contentType("application/json")
+                .when()
+                .delete("/products/{id}", productId)
+                .then()
+                .statusCode(400)
+                .body("errors", equalTo("Cannot delete this products, it has customer orders!"));
+    }
+
+    @Test
+    @WithMockUser
     public void should_search_product_success() {
         Product product = new Product();
         product.setId(1L);

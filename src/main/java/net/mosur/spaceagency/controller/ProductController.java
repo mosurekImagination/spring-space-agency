@@ -88,6 +88,11 @@ public class ProductController {
     @RolesAllowed("MANAGER")
     public ResponseEntity deleteProduct(@PathVariable("id") long id){
         return productService.findById(id).map(product -> {
+            if (productService.hasOrders(product)) {
+                return ResponseEntity.badRequest().body(new HashMap<Object, String>() {{
+                    put("errors", "Cannot delete this products, it has customer orders!");
+                }});
+            }
             productService.deleteById(id);
             return ResponseEntity.noContent().build();
         }).orElseThrow(ResourceNotFoundException::new);

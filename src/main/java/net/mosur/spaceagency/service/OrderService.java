@@ -40,4 +40,8 @@ public class OrderService {
     public boolean hasAccessToProduct(Product product, long userId) {
         return productsOrderRepository.productsContainsAndAndUserId(product, userId).isPresent();
     }
+
+    public List<ProductsOrder> findByProduct(Product product) {
+        return productsOrderRepository.findAllByProductsContains(product);
+    }
 }

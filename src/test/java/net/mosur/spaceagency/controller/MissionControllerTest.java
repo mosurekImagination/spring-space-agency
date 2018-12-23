@@ -154,6 +154,30 @@ public class MissionControllerTest {
 
     @Test
     @WithMockUser
+    public void should_show_error_updating_mission_with_exising_name() {
+        String missionName = "test mission";
+        ImageryType imageryType = ImageryType.MULTISPECTRAL;
+        String startDate = "2018-12-16T22:21:38.175691600Z";
+        String endDate = "2018-12-18T22:21:38.175691600Z";
+        Mission mission = new Mission(missionName, imageryType, Instant.parse(startDate), Instant.parse(endDate));
+
+        Map<String, Object> param = prepareCreateMissionParameter(missionName, imageryType.toString(), startDate, endDate);
+
+        when(missionService.findById(anyLong())).thenReturn(Optional.of(mission));
+        when(missionService.findByMissionName(any())).thenReturn(Optional.of(mission));
+
+        given()
+                .contentType("application/json")
+                .body(param)
+                .when()
+                .put("/missions/{id}", 1)
+                .then()
+                .statusCode(422)
+                .body("errors.missionName[0]", equalTo("Mission with that name already exists!"));
+    }
+
+    @Test
+    @WithMockUser
     public void should_show_error_message_for_blank_imagery_type() {
         String missionName = "testName";
         String imageryType = "";

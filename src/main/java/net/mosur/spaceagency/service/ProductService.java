@@ -97,4 +97,8 @@ public class ProductService {
     public List<Product> findByMission(Mission mission) {
         return productRepository.findAllByMission(mission);
     }
+
+    public boolean hasOrders(Product product) {
+        return !orderService.findByProduct(product).isEmpty();
+    }
 }
