@@ -5,6 +5,8 @@ import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.model.enums.ImageryType;
+import net.mosur.spaceagency.domain.payload.BoughtProductResponse;
+import net.mosur.spaceagency.domain.payload.ProductResponse;
 import net.mosur.spaceagency.service.MissionService;
 import net.mosur.spaceagency.service.ProductService;
 import net.mosur.spaceagency.service.UserService;
@@ -19,12 +21,15 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.*;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +47,8 @@ public class ProductControllerTest {
     @MockBean
     private MissionService missionService;
 
+    @MockBean
+    private UserService userService;
 
     @Before
     public void setUp() {
@@ -66,13 +73,7 @@ public class ProductControllerTest {
 
         when(missionService.findByMissionName(eq(missionName))).thenReturn(Optional.of(mission));
 
-        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
-                Arrays.asList(
-                        new Coordinate(1, 1),
-                        new Coordinate(-1, 1),
-                        new Coordinate(1, -1),
-                        new Coordinate(-1, -1)
-                )
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url, getValidCoords()
         );
 
         given()
@@ -95,13 +96,7 @@ public class ProductControllerTest {
         String price = "100.00";
         String url = "http://asdf.pl";
 
-        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
-                Arrays.asList(
-                        new Coordinate(1, 1),
-                        new Coordinate(1, 2),
-                        new Coordinate(1, 3),
-                        new Coordinate(1, 4)
-                )
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url, getValidCoords()
         );
 
         given()
@@ -122,13 +117,7 @@ public class ProductControllerTest {
         String price = "100.00";
         String url = "";
 
-        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
-                Arrays.asList(
-                        new Coordinate(1, 1),
-                        new Coordinate(1, 2),
-                        new Coordinate(1, 3),
-                        new Coordinate(1, 4)
-                )
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url, getValidCoords()
         );
 
         given()
@@ -149,13 +138,7 @@ public class ProductControllerTest {
         String price = "";
         String url = "url:";
 
-        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
-                Arrays.asList(
-                        new Coordinate(1, 1),
-                        new Coordinate(1, 2),
-                        new Coordinate(1, 3),
-                        new Coordinate(1, 4)
-                )
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url, getValidCoords()
         );
 
         given()
@@ -173,18 +156,11 @@ public class ProductControllerTest {
     @WithMockUser
     public void should_create_product_without_acquisitionDate_fail() {
         String missionName = "test";
-        String imageryType = ImageryType.MULTISPECTRAL.toString();
         String acquisitionDate = "";
         String price = "100.00";
         String url = "url:";
 
-        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url,
-                Arrays.asList(
-                        new Coordinate(1, 1),
-                        new Coordinate(1, 2),
-                        new Coordinate(1, 3),
-                        new Coordinate(1, 4)
-                )
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url, getValidCoords()
         );
 
         given()
@@ -201,7 +177,6 @@ public class ProductControllerTest {
     @WithMockUser
     public void should_create_product_without_footprint_fail() {
         String missionName = "test";
-        String imageryType = ImageryType.MULTISPECTRAL.toString();
         String acquisitionDate = "2018-12-18T22:21:38.175691600Z";
         String price = "100.00";
         String url = "http://asdf.pl";
@@ -320,6 +295,47 @@ public class ProductControllerTest {
                 .statusCode(200);
     }
 
+    @Test
+    @WithMockUser
+    public void should_get_bought_product_with_url_success() {
+        Product product = new Product(new Mission(), Instant.now(), getValidCoords(), BigDecimal.valueOf(100), "url");
+        product.setId(1L);
+
+        when(productService.findById(anyLong())).thenReturn(Optional.of(product));
+        when(userService.getUserId(any())).thenReturn(1L);
+        when(productService.getProductDetail(any(), anyLong())).thenReturn(new BoughtProductResponse(product));
+
+        given()
+                .contentType("application/json")
+                .when()
+                .get("/products/{id}", 1)
+                .then()
+                .statusCode(200)
+                .body("product.id", equalTo(1))
+                .body("product", hasKey("url"))
+                .body("product.url", equalTo("url"));
+    }
+
+    @Test
+    @WithMockUser
+    public void should_hide_product_url_success() {
+        Product product = new Product(new Mission(), Instant.now(), getValidCoords(), BigDecimal.valueOf(100), "url");
+        product.setId(1L);
+
+        when(productService.findById(anyLong())).thenReturn(Optional.of(product));
+        when(userService.getUserId(any())).thenReturn(1L);
+        when(productService.getProductDetail(any(), anyLong())).thenReturn(new ProductResponse(product));
+
+        given()
+                .contentType("application/json")
+                .when()
+                .get("/products/{id}", 1)
+                .then()
+                .statusCode(200)
+                .body("product.id", equalTo(1))
+                .body("product", not(hasKey("url")));
+    }
+
     private Map<String, Object> prepareCreateProductParameter(String missionName, String acquisitionDate, String price, String url, List<Coordinate> coords) {
         return new HashMap<String, Object>() {{
             put("missionName", missionName);
@@ -328,5 +344,14 @@ public class ProductControllerTest {
             put("url", url);
             put("footprint", coords);
         }};
+    }
+
+    private List<Coordinate> getValidCoords() {
+        return Arrays.asList(
+                new Coordinate(1, 1),
+                new Coordinate(-1, 1),
+                new Coordinate(1, -1),
+                new Coordinate(-1, -1)
+        );
     }
 }

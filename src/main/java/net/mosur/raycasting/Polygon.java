@@ -42,7 +42,7 @@ public class Polygon {
         return count % 2 != 0;
     }
 
-    public boolean intersectSegment(Point p, Side side) {
+    private boolean intersectSegment(Point p, Side side) {
         Point lowest = getLowestPoint(side);
         Point highest = getHighestPoint(side);
         p = checkIfYEqual(p, lowest, highest);

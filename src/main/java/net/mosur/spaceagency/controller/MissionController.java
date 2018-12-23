@@ -18,9 +18,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/missions")
@@ -51,6 +49,16 @@ public class MissionController {
 
         return ResponseEntity.status(201).body(new HashMap<String, Object>() {{
             put("mission", savedMission);
+        }});
+    }
+
+    @GetMapping
+    @RolesAllowed("MANAGER")
+    public ResponseEntity getMissions() {
+        List<Mission> missions = new ArrayList<>();
+        missionService.findAll().forEach(missions::add);
+        return ResponseEntity.status(200).body(new HashMap<String, Object>() {{
+            put("missions", missions);
         }});
     }
 
@@ -91,7 +99,6 @@ public class MissionController {
     @DeleteMapping(path = "/{id}")
     @RolesAllowed("MANAGER")
     public ResponseEntity<?> deleteMission(@PathVariable("id") long missionId) {
-
         return missionService.findById(missionId).map(mission -> {
             missionService.delete(mission);
             return ResponseEntity.noContent().build();
@@ -113,7 +120,6 @@ class NewMissionParam{
     private String missionName;
     @NotBlank(message = "can't be empty")
     private String imageryType;
-
     private Instant startDate;
     private Instant finishDate;
 }

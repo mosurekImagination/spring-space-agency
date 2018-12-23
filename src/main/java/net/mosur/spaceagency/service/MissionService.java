@@ -32,4 +32,8 @@ public class MissionService {
     public void delete(Mission mission){
         missionRepository.delete(mission);
     }
+
+    public Iterable<Mission> findAll() {
+        return missionRepository.findAll();
+    }
 }

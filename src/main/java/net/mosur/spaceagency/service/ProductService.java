@@ -2,6 +2,7 @@ package net.mosur.spaceagency.service;
 
 import net.mosur.raycasting.Point;
 import net.mosur.raycasting.Polygon;
+import net.mosur.spaceagency.domain.exception.UnauthorizedException;
 import net.mosur.spaceagency.domain.model.Coordinate;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.payload.BoughtProductResponse;
@@ -72,14 +73,23 @@ public class ProductService {
         return productRepository.findAllById(productsIds);
     }
 
-    public ProductResponse getProductResponseWithUrl(Product product, Long userId) {
+    public BoughtProductResponse getProductResponseWithUrl(Product product, Long userId) {
         if (orderService.hasAccessToProduct(product, userId)) {
             return new BoughtProductResponse(product);
+        } else {
+            throw new UnauthorizedException();
         }
-        return new ProductResponse(product);
     }
 
     public ProductResponse getProductResponse(Product product) {
         return new ProductResponse(product);
+    }
+
+    public ProductResponse getProductDetail(Product product, long userId) {
+        if (orderService.hasAccessToProduct(product, userId))
+            return getProductResponseWithUrl(product, userId);
+        else {
+            return getProductResponse(product);
+        }
     }
 }

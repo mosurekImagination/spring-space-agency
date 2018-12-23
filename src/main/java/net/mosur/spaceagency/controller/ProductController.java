@@ -83,8 +83,7 @@ public class ProductController {
         return productService.findById(id).map(product -> {
             productService.deleteById(id);
             return ResponseEntity.noContent().build();
-        })
-                .orElseThrow(ResourceNotFoundException::new);
+        }).orElseThrow(ResourceNotFoundException::new);
     }
 
     @GetMapping(path = "/")
@@ -107,13 +106,13 @@ public class ProductController {
                                         Principal principal) {
         long userId = userService.getUserId(principal);
         return productService.findById(productId).map(product ->
-                ResponseEntity.ok(productResponse(product, userId)))
+                ResponseEntity.ok(productDetailResponse(product, userId)))
                 .orElseThrow(ResourceNotFoundException::new);
     }
 
-    private Map<String, Object> productResponse(Product product, long userId) {
+    private Map<String, Object> productDetailResponse(Product product, long userId) {
         return new HashMap<String, Object>() {{
-            put("product", productService.getProductResponseWithUrl(product, userId));
+            put("product", productService.getProductDetail(product, userId));
         }};
     }
 }

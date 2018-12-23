@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -258,6 +259,40 @@ public class MissionControllerTest {
                 .body("mission.finishDate", equalTo(endDate));
 
         verify(missionService).save(any());
+    }
+
+    @Test
+    @WithMockUser
+    public void should_get_all_missions() {
+        String missionName = "TestName";
+        String imageryType = ImageryType.MULTISPECTRAL.toString();
+        String startDate = "2018-12-16T22:21:38.175691600Z";
+        String endDate = "2018-12-18T22:21:38.175691600Z";
+
+        Mission mission = new Mission();
+        mission.setId(1L);
+        mission.setMissionName(missionName);
+        mission.setImageryType(ImageryType.MULTISPECTRAL);
+        mission.setStartDate(Instant.parse(startDate));
+
+
+        Mission mission2 = new Mission();
+        mission2.setId(1L);
+        mission2.setMissionName(missionName + "2");
+        mission2.setImageryType(ImageryType.MULTISPECTRAL);
+        mission2.setStartDate(Instant.parse(startDate));
+        mission2.setFinishDate(Instant.parse(endDate));
+
+        when(missionService.findAll()).thenReturn(Arrays.asList(mission, mission2));
+
+        given()
+                .contentType("application/json")
+                .when()
+                .get("/missions/")
+                .then()
+                .statusCode(200)
+                .body("missions.size()", equalTo(2))
+                .body("missions[0].imageryType", equalTo(imageryType));
     }
 
     @Test

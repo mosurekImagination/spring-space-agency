@@ -81,7 +81,7 @@ public class MissionServiceTest {
     }
 
     @Test
-    public void should_get_save_mission_success() {
+    public void should_save_mission_success() {
         String newMissionName = MISSION_NAME + "2";
         Mission toSave = new Mission(newMissionName, ImageryType.PANCHROMATIC, Instant.now(), Instant.now());
         missionService.save(toSave);
