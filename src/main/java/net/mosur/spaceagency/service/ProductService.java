@@ -4,6 +4,7 @@ import net.mosur.raycasting.Point;
 import net.mosur.raycasting.Polygon;
 import net.mosur.spaceagency.domain.exception.UnauthorizedException;
 import net.mosur.spaceagency.domain.model.Coordinate;
+import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import net.mosur.spaceagency.domain.payload.BoughtProductResponse;
 import net.mosur.spaceagency.domain.payload.ProductResponse;
@@ -91,5 +92,9 @@ public class ProductService {
         else {
             return getProductResponse(product);
         }
+    }
+
+    public List<Product> findByMission(Mission mission) {
+        return productRepository.findAllByMission(mission);
     }
 }

@@ -9,6 +9,7 @@ import net.mosur.spaceagency.domain.exception.ResourceNotFoundException;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import net.mosur.spaceagency.service.MissionService;
+import net.mosur.spaceagency.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -25,10 +26,12 @@ import java.util.*;
 public class MissionController {
 
     private final MissionService missionService;
+    private final ProductService productService;
 
     @Autowired
-    public MissionController(MissionService missionService) {
+    public MissionController(MissionService missionService, ProductService productService) {
         this.missionService = missionService;
+        this.productService = productService;
     }
 
     @PostMapping
@@ -100,6 +103,11 @@ public class MissionController {
     @RolesAllowed("MANAGER")
     public ResponseEntity<?> deleteMission(@PathVariable("id") long missionId) {
         return missionService.findById(missionId).map(mission -> {
+            if (missionService.hasProducts(mission)) {
+                return ResponseEntity.badRequest().body(new HashMap<String, Object>() {{
+                    put("errors", "Mission has product, delete its products first");
+                }});
+            }
             missionService.delete(mission);
             return ResponseEntity.noContent().build();
         }).orElseThrow(ResourceNotFoundException::new);

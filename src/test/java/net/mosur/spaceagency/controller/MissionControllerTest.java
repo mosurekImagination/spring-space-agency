@@ -4,6 +4,7 @@ import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.enums.ImageryType;
 import net.mosur.spaceagency.service.MissionService;
+import net.mosur.spaceagency.service.ProductService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,8 +23,7 @@ import java.util.Optional;
 
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,7 +33,8 @@ public class MissionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    @MockBean
+    private ProductService productService;
     @MockBean
     private MissionService missionService;
 
@@ -129,6 +130,26 @@ public class MissionControllerTest {
                 .then()
                 .statusCode(422)
                 .body("errors.missionName[0]", equalTo("can't be empty"));
+    }
+
+    @Test
+    @WithMockUser
+    public void should_show_error_deleting_mission_with_products() {
+        String missionName = "test mission";
+        ImageryType imageryType = ImageryType.MULTISPECTRAL;
+        String startDate = "2018-12-16T22:21:38.175691600Z";
+        String endDate = "2018-12-18T22:21:38.175691600Z";
+        Mission mission = new Mission(missionName, imageryType, Instant.parse(startDate), Instant.parse(endDate));
+        when(missionService.findById(anyLong())).thenReturn(Optional.of(mission));
+        when(missionService.hasProducts(any())).thenReturn(true);
+
+        given()
+                .contentType("application/json")
+                .when()
+                .delete("/missions/{id}", 1)
+                .then()
+                .statusCode(400)
+                .body("errors", equalTo("Mission has product, delete its products first"));
     }
 
     @Test

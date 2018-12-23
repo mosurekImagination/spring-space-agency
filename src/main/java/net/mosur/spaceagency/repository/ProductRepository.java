@@ -1,5 +1,6 @@
 package net.mosur.spaceagency.repository;
 
+import net.mosur.spaceagency.domain.model.Mission;
 import net.mosur.spaceagency.domain.model.Product;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
     void deleteById(Long aLong);
 
     List<Product> findAll(Specification<Product> spec);
+
+    List<Product> findAllByMission(Mission mission);
 }

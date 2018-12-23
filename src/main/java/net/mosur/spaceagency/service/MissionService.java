@@ -11,10 +11,12 @@ import java.util.Optional;
 public class MissionService {
 
     private final MissionRepository missionRepository;
+    private final ProductService productService;
 
     @Autowired
-    public MissionService(MissionRepository missionRepository) {
+    public MissionService(MissionRepository missionRepository, ProductService productService) {
         this.missionRepository = missionRepository;
+        this.productService = productService;
     }
 
     public Optional<Mission> findByMissionName(String name){
@@ -35,5 +37,9 @@ public class MissionService {
 
     public Iterable<Mission> findAll() {
         return missionRepository.findAll();
+    }
+
+    public boolean hasProducts(Mission mission) {
+        return !productService.findByMission(mission).isEmpty();
     }
 }

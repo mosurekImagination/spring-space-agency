@@ -53,7 +53,7 @@ public class ProductController {
         product.setUrl(newProductParam.getUrl());
         product.setPrice(new BigDecimal(newProductParam.getPrice()));
         product.setAcquisitionDate(Instant.parse(newProductParam.getAcquisitionDate()));
-
+        product.setFootprint(newProductParam.getFootprint());
         product.setMission(missionService.findByMissionName(newProductParam.getMissionName()).get());
 
         productService.save(product);
@@ -72,9 +72,16 @@ public class ProductController {
         if (new BigDecimal(newProductParam.getPrice()).compareTo(BigDecimal.ZERO) < 0) {
             bindingResult.rejectValue("price", "LESS THAN ZERO", "price must be 0 or more");
         }
+        if (invalidCoordinates(newProductParam.getFootprint())) {
+            bindingResult.rejectValue("footprint", "NULL VALUES", "longitude and latitude cannot be null");
+        }
         if (bindingResult.hasErrors()) {
             throw new InvalidRequestException(bindingResult);
         }
+    }
+
+    private boolean invalidCoordinates(List<Coordinate> footprint) {
+        return footprint.stream().anyMatch(coord -> coord.getLatitude() == null || coord.getLongitude() == null);
     }
 
     @DeleteMapping(path = "/{id}")
@@ -91,7 +98,7 @@ public class ProductController {
     public ResponseEntity<?> searchProducts(@RequestParam(value = "missionName", required = false) String missionName,
                                             @RequestParam(value = "productType", required = false) String productType,
                                             @RequestParam(value = "acquisitionDateFrom ", required = false) String acquisitionDateFrom,
-                                            @RequestParam(value = "acquistionDateTo", required = false) String acquisitionDateTo,
+                                            @RequestParam(value = "acquisitionDateTo", required = false) String acquisitionDateTo,
                                             @RequestParam(value = "longitude", required = false) Double longitude,
                                             @RequestParam(value = "latitude", required = false) Double latitude) {
         List<Product> products = productService.findProductsWithCriteria(missionName, productType, acquisitionDateFrom, acquisitionDateTo, longitude, latitude);

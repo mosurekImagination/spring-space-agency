@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -23,8 +24,11 @@ public class Coordinate {
     @JsonIgnore
     private long id;
 
-    double longitude;
-    double latitude;
+    @NotNull
+    Double longitude;
+
+    @NotNull
+    Double latitude;
 
     public Coordinate(double longitude, double latitude) {
         this.longitude = longitude;

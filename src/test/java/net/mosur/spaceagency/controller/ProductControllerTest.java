@@ -111,6 +111,28 @@ public class ProductControllerTest {
 
     @Test
     @WithMockUser
+    public void should_create_product_with_invalid_coords_fail() {
+        String missionName = "testMission2";
+        String acquisitionDate = "2018-12-18T22:21:38.175691600Z";
+        String price = "100.00";
+        String url = "http://asdf.pl";
+        List<Coordinate> coords = getValidCoords();
+        coords.get(0).setLatitude(null);
+        Map<String, Object> param = prepareCreateProductParameter(missionName, acquisitionDate, price, url, coords
+        );
+
+        given()
+                .contentType("application/json")
+                .body(param)
+                .when()
+                .post("/products/")
+                .then()
+                .statusCode(422)
+                .body("errors.footprint[0]", equalTo("longitude and latitude cannot be null"));
+    }
+
+    @Test
+    @WithMockUser
     public void should_create_product_without_url_fail() {
         String missionName = "test";
         String acquisitionDate = "2018-12-18T22:21:38.175691600Z";
